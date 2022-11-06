@@ -1,0 +1,28 @@
+Metadata-Version: 2.1
+Name: pewee
+Version: 0.1.0.dev9
+Summary: Pack required DLLs into wheels
+Home-page: https://github.com/bnoctis/pewee
+Author: Blair Noctis
+Author-email: code@noctis.im
+License: BSD-3-Clause
+Keywords: wheel,packaging,windows
+Platform: UNKNOWN
+Classifier: License :: OSI Approved :: BSD License
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Environment :: Win32 (MS Windows)
+Classifier: Environment :: Console
+Classifier: Intended Audience :: Developers
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python :: 3
+Classifier: Topic :: Software Development :: Build Tools
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
+License-File: LICENSE
+License-File: AUTHORS
+Requires-Dist: pefile (==2021.9.3)
+Provides-Extra: cli
+Requires-Dist: click (==8.1.2) ; extra == 'cli'
+Requires-Dist: prettytable (==3.2.0) ; extra == 'cli'
+
+Pack required DLLs into wheels
+

@@ -1,0 +1,3 @@
+[console_scripts]
+pewee = pewee.cli:cli [cli]
+
