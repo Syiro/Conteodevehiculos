@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class configuracion(BaseModel):
-    idconfiguracion:int
+    idconfiguracion:Optional[int]
     brillo:int
     contraste:int
     color:int
@@ -11,4 +11,17 @@ class configuracion(BaseModel):
     
     class Config:
         orm_mode = True
+
+class configuracionUpdate(BaseModel):
+    modo:str
+
+    
+    class Config:
+        orm_mode = True
+
+class Respuesta(BaseModel):
+    mensaje:str
+
+    
+
             
