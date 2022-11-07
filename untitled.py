@@ -11,6 +11,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pewee
 
+from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QPushButton
 #from app import *
 
 
