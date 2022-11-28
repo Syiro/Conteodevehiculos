@@ -122,25 +122,6 @@
          </item>
          <item>
           <layout class="QFormLayout" name="formLayout">
-           <item row="1" column="0">
-            <widget class="QComboBox" name="comboBox">
-             <item>
-              <property name="text">
-               <string>Video</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Imagenes</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Video en Tiempo real</string>
-              </property>
-             </item>
-            </widget>
-           </item>
            <item row="2" column="0">
             <spacer name="horizontalSpacer_14">
              <property name="orientation">
@@ -184,6 +165,25 @@
              </property>
             </widget>
            </item>
+           <item row="1" column="0">
+            <widget class="QComboBox" name="comboBox">
+             <item>
+              <property name="text">
+               <string>Video</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Imagenes</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Video en Tiempo real</string>
+              </property>
+             </item>
+            </widget>
+           </item>
           </layout>
          </item>
         </layout>
@@ -192,6 +192,12 @@
         <widget class="QLabel" name="label_16">
          <property name="text">
           <string>Previsualizacion</string>
+         </property>
+         <property name="wordWrap">
+          <bool>false</bool>
+         </property>
+         <property name="margin">
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -232,9 +238,6 @@
           </layout>
          </item>
         </layout>
-       </item>
-       <item row="5" column="1" rowspan="2" colspan="2">
-        <widget class="QTextBrowser" name="textBrowser_3"/>
        </item>
        <item row="1" column="2">
         <widget class="QRadioButton" name="radioButton">
@@ -329,6 +332,16 @@
          </property>
          <property name="textInteractionFlags">
           <set>Qt::NoTextInteraction</set>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1" colspan="2">
+        <widget class="QLabel" name="label_18">
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string/>
          </property>
         </widget>
        </item>

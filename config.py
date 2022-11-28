@@ -1,15 +1,16 @@
 import asyncio
 import json
-
+import sys
 import requests
 import uvicorn
-
+from configcolor import*
 from app import Conexion, main, models, schemas
 from untitled import *
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QPushButton, QFileDialog
+from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QPushButton, QFileDialog
+from PyQt5.QtCore import *
+from PyQt5.QtGui import QPixmap
 
-
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
         self.setupUi(self)
@@ -25,22 +26,80 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSlider_4.valueChanged.connect(self.brillo)
         self.horizontalSlider_5.valueChanged.connect(self.contraste)
         self.horizontalSlider_6.valueChanged.connect(self.color)
-        # Radio buttonsimplement
-        # self.radioButton_2.toggled.connect(self.tiempoReal)
-        # self.radioButton_3.toggled.connect(self.archivo)
 
         # boton guardarimplement
         self.pushButton_4.clicked.connect(self.enviar)
-     
+        
+        # boton importarimplement
+        self.pushButton_3.clicked.connect(self.importar)
+        
+    def importar(self):
+        url = 'http://127.0.0.1:8000/configuracion/'
+        data,b = QFileDialog.getOpenFileName(self,'Open File',''," Json (*.json)") 
+        file = open(data)
+        data = json.load(file)
+        response = requests.post(url, data)
+        data2=json.dumps(data,indent=6,sort_keys=True,separators =(". ", " = "))
+        self.configactual(data2)
+        self.enviarimport(data)
+        if response.status_code == 200:
+            print(response.content)
+    
+    def enviarimport(self,data):
+        global brillo,cont,color,modo,red
+        brillo = data["brillo"]
+        cont = data["contraste"]
+        color = data["color"]
+        modo = data["modo"]
+        red = data["redneuronal"]
+        self.horizontalSlider_4.setValue(brillo)
+        self.horizontalSlider_5.setValue(cont)
+        self.horizontalSlider_6.setValue(color)
+       
+        index=self.comboBox.findText(modo)
+        index2=self.comboBox_4.findText(red)
+        self.comboBox.setCurrentIndex(index)
+        self.comboBox_4.setCurrentIndex(index2)
+    
+    def configuracionbrillo(self,path,brillo):
+        pathout = self.configbrillo(path=path,brillo=brillo)
+        return pathout
+    
+    def configuracioncontraste(self,path,cont):
+        pathout = self.configcontraste(path=path,contraste=cont)
+        return pathout
+    
+    def configuracioncolor(self,path,color):
+        pathout = self.configcolor(path=path,color=color)
+        return pathout
+        
+        
+        
+      
+    
     def fileopen(self,type):
+        global fname
         if type =="Video":
-            fname = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4),(*.wav)") 
+            fname = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)") 
         elif type =="Imagenes":
-            fname = QFileDialog.getOpenFileName(self,"Open File",""," Imagenes (*.jpg),(*.jpeg),(*.png)") 
+            fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)") 
+            self.label_18.setPixmap(QPixmap(fname))
+            
         elif type =="Tiempo real":
             print("proximamente")
-        return fname
+            fname=""
+        
+       
     
+    def filesave(self,data):
+        sname,b = QFileDialog.getSaveFileName(self,'Save file','',"Json (*.json)")
+        file = open(sname,'w')
+        file.write(data)
+        file.close()
+    
+       
+        
+        
     def configactual(self,data):
         self.textEdit.setPlainText(data)
         
@@ -49,17 +108,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         global brillo
         slider = self.sender()
         brillo = slider.value()
+        self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
+        
 
     def contraste(self):
         global cont
         slider = self.sender()
         cont = slider.value()
-
+        self.label_18.setPixmap(QPixmap(self.configuracioncontraste(fname,cont)))
     def color(self):
         global color
         slider = self.sender()
         color = slider.value()
-
+        self.label_18.setPixmap(QPixmap(self.configuracioncolor(fname,color)))
     def modo(self):
         global modo
         combobox = self.sender()
@@ -110,6 +171,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
             response = requests.post(url, data)
             self.configactual(data2)
+            self.filesave(data)
             if response.status_code == 200:
                 print(response.content)
 
@@ -123,6 +185,7 @@ class QDialog(QDialog):
         super(QDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("!!ERROR!!")
         self.setFixedSize(200, 100)
+
 
 
 if __name__ == "__main__":
