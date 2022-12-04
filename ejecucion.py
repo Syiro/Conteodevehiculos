@@ -80,6 +80,7 @@ class Ejecucion:
             if i > 0.40:
                 count=count+1
         self.label_25.setText(str(count))
+        #comentario de control ejje
        
         
     def Mostrar_img(self,fname,brillo,color,cont):
