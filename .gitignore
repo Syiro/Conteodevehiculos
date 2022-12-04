@@ -12,3 +12,4 @@
 content/*
 db/*
 fine_tuned_model/*
+.venv/lib/python3.8/site-packages/tensorflow/python/_pywrap_tensorflow_internal.so
