@@ -1,0 +1,14 @@
+#ignore media files
+*.jpg
+*.png
+*.mp4
+*.jgeg
+
+#ignore zip files 
+*.zip
+
+#ignore ven
+.venv/*	
+content/*
+db/*
+fine_tuned_model/*
