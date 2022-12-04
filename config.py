@@ -4,13 +4,14 @@ import sys
 import requests
 import uvicorn
 from configcolor import*
+from ejecucion import Ejecucion
 from app import Conexion, main, models, schemas
 from untitled import *
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QPushButton, QFileDialog
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
         self.setupUi(self)
@@ -26,12 +27,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
         self.horizontalSlider_4.valueChanged.connect(self.brillo)
         self.horizontalSlider_5.valueChanged.connect(self.contraste)
         self.horizontalSlider_6.valueChanged.connect(self.color)
+        
 
         # boton guardarimplement
         self.pushButton_4.clicked.connect(self.enviar)
         
         # boton importarimplement
         self.pushButton_3.clicked.connect(self.importar)
+        
+        # radio button automaticoimplement
+        self.radioButton.toggled.connect(self.automatico)
+
+        # start button implement
+        self.pushButton_12.clicked.connect(self.modoejecucion)
+        
+    def modoejecucion(self):
+        self.Ejecucion_mode(modo=modo,red=red)
+        self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
+        self.Inferencia(img=fname)
+        
+    def automatico(self):
+        brillo=10
+        color=10
+        cont=10
+        self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
+        self.label_18.setPixmap(QPixmap(self.configuracioncolor(fname,color)))
+        self.label_18.setPixmap(QPixmap(self.configuracioncontraste(fname,cont)))
+        self.horizontalSlider_4.setValue(brillo)
+        self.horizontalSlider_5.setValue(cont)
+        self.horizontalSlider_6.setValue(color)
+        
         
     def importar(self):
         url = 'http://127.0.0.1:8000/configuracion/'
@@ -60,6 +85,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
         index2=self.comboBox_4.findText(red)
         self.comboBox.setCurrentIndex(index)
         self.comboBox_4.setCurrentIndex(index2)
+        
+        if fname!="" and brillo!=10 and cont !=10:
+            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,color)))
+        elif fname!="" and brillo!=10 and color !=10:
+            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,cont)))
+        elif fname!="" and cont!=10 and color !=10:
+            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
+            
+        
     
     def configuracionbrillo(self,path,brillo):
         pathout = self.configbrillo(path=path,brillo=brillo)
@@ -72,8 +106,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
     def configuracioncolor(self,path,color):
         pathout = self.configcolor(path=path,color=color)
         return pathout
-        
-        
         
       
     
@@ -103,24 +135,49 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
     def configactual(self,data):
         self.textEdit.setPlainText(data)
         
-
+    # def modyfiimage(self):
+    #     global brillo,cont,color
+    #     brillo = self.horizontalSlider_4.value()
+    #     cont = self.horizontalSlider_5.value()
+    #     color = self.horizontalSlider_6.value()
+    #     self.label_18.setPixmap(QPixmap(self.convertimage(fname,brillo,cont,color)))
+    
     def brillo(self):
-        global brillo
+        global brillo,cont,color
+        cont=10
+        color=10
+        self.horizontalSlider_5.setValue(cont)
+        self.horizontalSlider_6.setValue(color)
+        self.radioButton.setChecked(False)
         slider = self.sender()
         brillo = slider.value()
         self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
         
-
+        
     def contraste(self):
-        global cont
+        global brillo,cont,color
+        brillo=10
+        color=10
+        self.horizontalSlider_4.setValue(brillo)
+        self.horizontalSlider_6.setValue(color)
+        self.radioButton.setChecked(False)
         slider = self.sender()
         cont = slider.value()
         self.label_18.setPixmap(QPixmap(self.configuracioncontraste(fname,cont)))
+        
+    
     def color(self):
-        global color
+        global brillo,cont,color
+        brillo=10
+        cont=10
+        self.horizontalSlider_4.setValue(brillo)
+        self.horizontalSlider_5.setValue(cont)
+        self.radioButton.setChecked(False) 
         slider = self.sender()
         color = slider.value()
         self.label_18.setPixmap(QPixmap(self.configuracioncolor(fname,color)))
+        
+        
     def modo(self):
         global modo
         combobox = self.sender()
@@ -139,12 +196,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
             type = modo
             self.fileopen(type) 
             self.radioButton_2.setChecked(True)
+        return modo
 
     def red(self):
         global red
         combobox = self.sender()
-        if combobox.currentText() == "Red1":
-            red = "Red1"
+        if combobox.currentText() == "SSD Movilnet 2.0 fpnlite":
+            red = "SSD Movilnet 2.0 fpnlite"
         if combobox.currentText() == "Red2":
             red = "Red2"
         if combobox.currentText() == "Red3":
@@ -158,9 +216,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor):
             cont
             color
 
-        except NameError:
+        except NameError: 
             self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
-            print("modo no definido")
             self.showdialog()
 
         else:
