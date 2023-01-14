@@ -28,18 +28,13 @@ limitations under the License.
 #include "tensorflow/core/protobuf/config.pb.h"
 #include "tensorflow/core/public/session_options.h"
 
-namespace tsl {
-namespace thread {
-struct ThreadPoolOptions;
-}
-}  // namespace tsl
-
 namespace tensorflow {
-
 class DeviceMgr;
 
 namespace thread {
-using tsl::thread::ThreadPoolOptions;
+
+struct ThreadPoolOptions;
+
 }
 
 /// \brief A Session instance lets a caller drive a TensorFlow graph

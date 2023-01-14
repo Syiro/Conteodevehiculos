@@ -13,23 +13,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-#ifndef TENSORFLOW_CORE_PUBLIC_SESSION_OPTIONS_H_
-#define TENSORFLOW_CORE_PUBLIC_SESSION_OPTIONS_H_
+#ifndef TENSORFLOW_PUBLIC_SESSION_OPTIONS_H_
+#define TENSORFLOW_PUBLIC_SESSION_OPTIONS_H_
 
 #include <string>
-
 #include "tensorflow/core/platform/types.h"
 #include "tensorflow/core/protobuf/config.pb.h"
 
-namespace tsl {
-class Env;
-}  // namespace tsl
 namespace tensorflow {
+
+class Env;
 
 /// Configuration information for a Session.
 struct SessionOptions {
   /// The environment to use.
-  tsl::Env* env;
+  Env* env;
 
   /// \brief The TensorFlow runtime to connect to.
   ///
@@ -64,4 +62,4 @@ struct SessionOptions {
 
 }  // end namespace tensorflow
 
-#endif  // TENSORFLOW_CORE_PUBLIC_SESSION_OPTIONS_H_
+#endif  // TENSORFLOW_PUBLIC_SESSION_OPTIONS_H_

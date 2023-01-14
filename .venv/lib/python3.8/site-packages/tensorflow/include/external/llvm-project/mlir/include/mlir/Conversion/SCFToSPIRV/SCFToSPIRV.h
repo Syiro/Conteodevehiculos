@@ -21,6 +21,7 @@ class Pass;
 class SPIRVTypeConverter;
 struct ScfToSPIRVContextImpl;
 class RewritePatternSet;
+using OwningRewritePatternList = RewritePatternSet;
 
 struct ScfToSPIRVContext {
   ScfToSPIRVContext();

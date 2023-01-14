@@ -16,13 +16,12 @@ limitations under the License.
 #ifndef TENSORFLOW_CORE_PLATFORM_TENSOR_FLOAT_32_UTILS_H_
 #define TENSORFLOW_CORE_PLATFORM_TENSOR_FLOAT_32_UTILS_H_
 
-#include "tensorflow/tsl/platform/tensor_float_32_utils.h"
-
 namespace tensorflow {
-// NOLINTBEGIN(misc-unused-using-decls)
-using tsl::enable_tensor_float_32_execution;
-using tsl::tensor_float_32_execution_enabled;
-// NOLINTEND(misc-unused-using-decls)
+
+void enable_tensor_float_32_execution(bool enabled);
+
+bool tensor_float_32_execution_enabled();
+
 }  // namespace tensorflow
 
 #endif  // TENSORFLOW_CORE_PLATFORM_TENSOR_FLOAT_32_UTILS_H_

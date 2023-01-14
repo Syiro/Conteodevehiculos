@@ -19,9 +19,6 @@
 #include "mlir/Dialect/OpenACC/OpenACCOpsDialect.h.inc"
 #include "mlir/Dialect/OpenACC/OpenACCOpsEnums.h.inc"
 
-#define GET_ATTRDEF_CLASSES
-#include "mlir/Dialect/OpenACC/OpenACCOpsAttributes.h.inc"
-
 #define GET_OP_CLASSES
 #include "mlir/Dialect/OpenACC/OpenACCOps.h.inc"
 
@@ -39,7 +36,7 @@ namespace acc {
 /// combined and the final mapping value would be 5 (4 | 1).
 enum OpenACCExecMapping { NONE = 0, VECTOR = 1, WORKER = 2, GANG = 4 };
 
-} // namespace acc
-} // namespace mlir
+} // end namespace acc
+} // end namespace mlir
 
 #endif // MLIR_DIALECT_OPENACC_OPENACC_H_

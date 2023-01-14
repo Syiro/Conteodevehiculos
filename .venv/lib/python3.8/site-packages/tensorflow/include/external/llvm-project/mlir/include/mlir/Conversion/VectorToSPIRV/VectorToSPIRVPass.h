@@ -10,20 +10,16 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MLIR_CONVERSION_VECTORTOSPIRV_VECTORTOSPIRVPASS_H
-#define MLIR_CONVERSION_VECTORTOSPIRV_VECTORTOSPIRVPASS_H
+#ifndef MLIR_CONVERSION_VECTORTOSPIRV_GPUTOSPIRVPASS_H
+#define MLIR_CONVERSION_VECTORTOSPIRV_GPUTOSPIRVPASS_H
 
 #include "mlir/Pass/Pass.h"
 
 namespace mlir {
-class ModuleOp;
-
-#define GEN_PASS_DECL_VECTORTOSPIRVPASS
-#include "mlir/Conversion/Passes.h.inc"
 
 /// Creates a pass to convert Vector Ops to SPIR-V ops.
-std::unique_ptr<OperationPass<>> createConvertVectorToSPIRVPass();
+std::unique_ptr<OperationPass<ModuleOp>> createConvertVectorToSPIRVPass();
 
 } // namespace mlir
 
-#endif // MLIR_CONVERSION_VECTORTOSPIRV_VECTORTOSPIRVPASS_H
+#endif // MLIR_CONVERSION_VECTORTOSPIRV_GPUTOSPIRVPASS_H

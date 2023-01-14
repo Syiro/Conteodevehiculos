@@ -10,8 +10,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MLIR_IR_TYPEUTILITIES_H
-#define MLIR_IR_TYPEUTILITIES_H
+#ifndef MLIR_SUPPORT_TYPEUTILITIES_H
+#define MLIR_SUPPORT_TYPEUTILITIES_H
 
 #include "mlir/IR/Operation.h"
 #include "llvm/ADT/STLExtras.h"
@@ -66,37 +66,40 @@ LogicalResult verifyCompatibleShapes(TypeRange types);
 
 /// Dimensions are compatible if all non-dynamic dims are equal.
 LogicalResult verifyCompatibleDims(ArrayRef<int64_t> dims);
-
 //===----------------------------------------------------------------------===//
 // Utility Iterators
 //===----------------------------------------------------------------------===//
 
 // An iterator for the element types of an op's operands of shaped types.
 class OperandElementTypeIterator final
-    : public llvm::mapped_iterator_base<OperandElementTypeIterator,
-                                        Operation::operand_iterator, Type> {
+    : public llvm::mapped_iterator<Operation::operand_iterator,
+                                   Type (*)(Value)> {
 public:
-  using BaseT::BaseT;
+  /// Initializes the result element type iterator to the specified operand
+  /// iterator.
+  explicit OperandElementTypeIterator(Operation::operand_iterator it);
 
-  /// Map the element to the iterator result type.
-  Type mapElement(Value value) const;
+private:
+  static Type unwrap(Value value);
 };
 
 using OperandElementTypeRange = iterator_range<OperandElementTypeIterator>;
 
 // An iterator for the tensor element types of an op's results of shaped types.
 class ResultElementTypeIterator final
-    : public llvm::mapped_iterator_base<ResultElementTypeIterator,
-                                        Operation::result_iterator, Type> {
+    : public llvm::mapped_iterator<Operation::result_iterator,
+                                   Type (*)(Value)> {
 public:
-  using BaseT::BaseT;
+  /// Initializes the result element type iterator to the specified result
+  /// iterator.
+  explicit ResultElementTypeIterator(Operation::result_iterator it);
 
-  /// Map the element to the iterator result type.
-  Type mapElement(Value value) const;
+private:
+  static Type unwrap(Value value);
 };
 
 using ResultElementTypeRange = iterator_range<ResultElementTypeIterator>;
 
-} // namespace mlir
+} // end namespace mlir
 
-#endif // MLIR_IR_TYPEUTILITIES_H
+#endif // MLIR_SUPPORT_TYPEUTILITIES_H

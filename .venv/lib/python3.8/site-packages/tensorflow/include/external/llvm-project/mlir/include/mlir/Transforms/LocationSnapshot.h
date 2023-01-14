@@ -26,9 +26,6 @@ class Operation;
 class OpPrintingFlags;
 class Pass;
 
-#define GEN_PASS_DECL_LOCATIONSNAPSHOT
-#include "mlir/Transforms/Passes.h.inc"
-
 /// This function generates new locations from the given IR by snapshotting the
 /// IR to the given stream, and using the printed locations within that stream.
 /// The generated locations replace the current operation locations.
@@ -64,6 +61,6 @@ std::unique_ptr<Pass> createLocationSnapshotPass(OpPrintingFlags flags,
 /// Overload utilizing pass options for initialization.
 std::unique_ptr<Pass> createLocationSnapshotPass();
 
-} // namespace mlir
+} // end namespace mlir
 
 #endif // MLIR_TRANSFORMS_LOCATIONSNAPSHOT_H

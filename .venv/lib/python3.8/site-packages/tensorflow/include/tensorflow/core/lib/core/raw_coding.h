@@ -16,6 +16,6 @@ limitations under the License.
 #ifndef TENSORFLOW_CORE_LIB_CORE_RAW_CODING_H_
 #define TENSORFLOW_CORE_LIB_CORE_RAW_CODING_H_
 
-#include "tensorflow/core/platform/raw_coding.h"  // IWYU pragma: export
+#include "tensorflow/core/platform/raw_coding.h"
 
 #endif  // TENSORFLOW_CORE_LIB_CORE_RAW_CODING_H_

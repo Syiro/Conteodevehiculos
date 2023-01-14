@@ -68,15 +68,15 @@ class BreakIterator;        // unicode/brkiter.h
 class ByteSink;
 class Locale;               // unicode/locid.h
 
-/** Returns true if the options are valid. Otherwise false, and sets an error. */
+/** Returns TRUE if the options are valid. Otherwise FALSE, and sets an error. */
 inline UBool ustrcase_checkTitleAdjustmentOptions(uint32_t options, UErrorCode &errorCode) {
-    if (U_FAILURE(errorCode)) { return false; }
+    if (U_FAILURE(errorCode)) { return FALSE; }
     if ((options & U_TITLECASE_ADJUSTMENT_MASK) == U_TITLECASE_ADJUSTMENT_MASK) {
         // Both options together.
         errorCode = U_ILLEGAL_ARGUMENT_ERROR;
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 inline UBool ustrcase_isLNS(UChar32 c) {

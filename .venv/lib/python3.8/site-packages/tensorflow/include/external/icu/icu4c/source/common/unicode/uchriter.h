@@ -11,9 +11,6 @@
 #define UCHRITER_H
 
 #include "unicode/utypes.h"
-
-#if U_SHOW_CPLUSPLUS_API
-
 #include "unicode/chariter.h"
 
 /**
@@ -135,7 +132,7 @@ public:
    * @return the CharacterIterator newly created
    * @stable ICU 2.0
    */
-  virtual UCharCharacterIterator* clone() const;
+  virtual CharacterIterator* clone(void) const;
 
   /**
    * Sets the iterator to refer to the first code unit in its
@@ -274,11 +271,11 @@ public:
   virtual UChar32       next32PostInc(void);
 
   /**
-   * Returns false if there are no more code units or code points
+   * Returns FALSE if there are no more code units or code points
    * at or after the current position in the iteration range.
    * This is used with nextPostInc() or next32PostInc() in forward
    * iteration.
-   * @return false if there are no more code units or code points
+   * @return FALSE if there are no more code units or code points
    * at or after the current position in the iteration range.
    * @stable ICU 2.0
    */
@@ -303,11 +300,11 @@ public:
   virtual UChar32       previous32(void);
 
   /**
-   * Returns false if there are no more code units or code points
+   * Returns FALSE if there are no more code units or code points
    * before the current position in the iteration range.
    * This is used with previous() or previous32() in backward
    * iteration.
-   * @return false if there are no more code units or code points
+   * @return FALSE if there are no more code units or code points
    * before the current position in the iteration range.
    * @stable ICU 2.0
    */
@@ -387,7 +384,4 @@ protected:
 };
 
 U_NAMESPACE_END
-
-#endif /* U_SHOW_CPLUSPLUS_API */
-
 #endif

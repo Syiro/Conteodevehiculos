@@ -18,11 +18,26 @@ limitations under the License.
 
 #include <memory>
 
-#include "tensorflow/tsl/platform/resource.h"
+#include "tensorflow/core/platform/stringpiece.h"
 
 namespace tensorflow {
 
-using ::tsl::ResourceTagger;  // NOLINT(misc-unused-using-decls)
+// ResourceTagger objects should only be allocated on the stack.
+class ResourceTagger {
+ public:
+  ResourceTagger(StringPiece key, StringPiece value);
+  ~ResourceTagger();
+
+  // Do not allow copying or moving ResourceTagger
+  ResourceTagger(const ResourceTagger&) = delete;
+  ResourceTagger(ResourceTagger&&) = delete;
+  ResourceTagger& operator=(const ResourceTagger&) = delete;
+  ResourceTagger& operator=(ResourceTagger&&) = delete;
+
+ private:
+  class ResourceTaggerImpl;
+  const std::unique_ptr<ResourceTaggerImpl> impl_;
+};
 
 }  // namespace tensorflow
 

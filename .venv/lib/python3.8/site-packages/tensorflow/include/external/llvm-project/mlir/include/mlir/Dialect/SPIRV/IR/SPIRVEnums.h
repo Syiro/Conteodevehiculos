@@ -24,7 +24,7 @@
 namespace mlir {
 namespace spirv {
 enum class Version : uint32_t;
-enum class Extension : uint32_t;
+enum class Extension;
 enum class Capability : uint32_t;
 } // namespace spirv
 } // namespace mlir
@@ -52,7 +52,7 @@ ArrayRef<Capability> getDirectImpliedCapabilities(Capability cap);
 /// third one will also be returned.
 SmallVector<Capability, 0> getRecursiveImpliedCapabilities(Capability cap);
 
-} // namespace spirv
-} // namespace mlir
+} // end namespace spirv
+} // end namespace mlir
 
 #endif // MLIR_DIALECT_SPIRV_IR_SPIRVENUMS_H_

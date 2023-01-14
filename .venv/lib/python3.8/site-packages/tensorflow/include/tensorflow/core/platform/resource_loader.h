@@ -21,11 +21,11 @@ limitations under the License.
 #ifndef TENSORFLOW_CORE_PLATFORM_RESOURCE_LOADER_H_
 #define TENSORFLOW_CORE_PLATFORM_RESOURCE_LOADER_H_
 
-#include "tensorflow/tsl/platform/resource_loader.h"
+#include <string>
 
 namespace tensorflow {
 
-using tsl::GetDataDependencyFilepath;
+std::string GetDataDependencyFilepath(const std::string& relative_path);
 
 }  // namespace tensorflow
 

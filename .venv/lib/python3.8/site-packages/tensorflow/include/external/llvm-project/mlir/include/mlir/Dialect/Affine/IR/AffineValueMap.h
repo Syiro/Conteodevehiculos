@@ -35,7 +35,7 @@ class AffineValueMap {
 public:
   // Creates an empty AffineValueMap (users should call 'reset' to reset map
   // and operands).
-  AffineValueMap() = default;
+  AffineValueMap() {}
   AffineValueMap(AffineMap map, ValueRange operands, ValueRange results = {});
 
   ~AffineValueMap();

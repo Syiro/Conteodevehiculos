@@ -15,15 +15,13 @@
 #define __DTINTRV_H__
 
 #include "unicode/utypes.h"
-
-#if U_SHOW_CPLUSPLUS_API
-
 #include "unicode/uobject.h"
 
 /**
  * \file
  * \brief C++ API: Date Interval data type
  */
+
 
 U_NAMESPACE_BEGIN
 
@@ -106,14 +104,14 @@ public:
 
     /**
      * Equality operator.
-     * @return true if the two DateIntervals are the same
+     * @return TRUE if the two DateIntervals are the same
      * @stable ICU 4.0
      */
     virtual UBool operator==(const DateInterval& other) const;
 
     /**
      * Non-equality operator
-     * @return true if the two DateIntervals are not the same
+     * @return TRUE if the two DateIntervals are not the same
      * @stable ICU 4.0
      */
     inline UBool operator!=(const DateInterval& other) const;
@@ -158,7 +156,5 @@ DateInterval::operator!=(const DateInterval& other) const {
 
 
 U_NAMESPACE_END
-
-#endif /* U_SHOW_CPLUSPLUS_API */
 
 #endif

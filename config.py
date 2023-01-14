@@ -4,12 +4,30 @@ import sys
 import requests
 import uvicorn
 from configcolor import*
+from video import*
 from ejecucion import Ejecucion
 from app import Conexion, main, models, schemas
 from untitled import *
 from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QPushButton, QFileDialog
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPixmap
+
+
+class Work(QThread):
+    Imageupd = pyqtSignal(QImage)
+    def run(self):
+        self.hilo_corriendo = True
+        cap = cv2.VideoCapture(fname)
+        while self.hilo_corriendo:
+            ret, frame = cap.read()
+            if ret:
+                Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                #flip = cv2.flip(Image, 1)
+                convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
+            
+                pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
+                self.Imageupd.emit(pic)
+                
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
     def __init__(self, *args, **kwargs):
@@ -30,6 +48,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         
 
         # boton guardarimplement
+        
         self.pushButton_4.clicked.connect(self.enviar)
         
         # boton importarimplement
@@ -41,11 +60,58 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         # start button implement
         self.pushButton_12.clicked.connect(self.modoejecucion)
         
-    def modoejecucion(self):
-        self.Ejecucion_mode(modo=modo,red=red)
-        self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
-        self.Inferencia(img=fname)
+        # stop button implement
         
+        self.pushButton_13.clicked.connect(self.cancel)
+        
+    def modoejecucion(self):
+        
+        if modo == "Imagenes":
+            self.Ejecucion_mode(modo=modo,red=red)
+            self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
+            self.Inferencia(img=fname)
+            
+        if modo == "Video":
+            self.Ejecucion_mode(modo=modo,red=red)
+            self.Inferencia_video(img=fname)
+            self.start_video(a=1)
+
+ 
+         
+    def start_video(self,a):
+        self.Work = Work()
+        self.Work.start()
+        if a == 1:
+         global fname
+         fname = "videocondetecciones.mp4"
+         self.Work.Imageupd.connect(self.Imageupd_slot)
+        else:
+            self.Work.Imageupd.connect(self.Imageupd_slotpre)
+ 
+    def Imageupd_slotpre(self, Image):
+        self.label_18.setPixmap(QPixmap.fromImage(Image))               
+
+    def Imageupd_slot(self, Image):
+        self.label_26.setPixmap(QPixmap.fromImage(Image))
+
+    def cancel(self):
+        self.label_26.clear()
+        #self.cap.release()
+
+    def salir(self):
+        sys.exit()
+        
+
+                
+    def stop(self):
+        self.hilo_corriendo = False
+        self.quit()
+        
+    
+    
+    
+    
+    
     def automatico(self):
         brillo=10
         color=10
@@ -112,7 +178,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
     def fileopen(self,type):
         global fname
         if type =="Video":
-            fname = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)") 
+            color=1
+            cont=1
+            brillo=1
+            fname,b = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)")
+            self.start_video(a=2) 
+
         elif type =="Imagenes":
             fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)") 
             self.label_18.setPixmap(QPixmap(fname))
@@ -209,28 +280,60 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
             red = "Red3"
 
     def enviar(self):
-        try:
-            modo
-            red
-            brillo
-            cont
-            color
+            if modo=="Video":
+                self.enviarvideo()
+            else:
+                try:
+                    modo
+                    red
+                    brillo
+                    cont
+                    color
+                except NameError: 
+                    self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
+                    self.showdialog()
+                else:
 
-        except NameError: 
-            self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
-            self.showdialog()
+                    url = 'http://127.0.0.1:8000/configuracion/'
+                    pyload = {'brillo': brillo, 'contraste': cont,
+                            'color': color, 'modo': modo, 'redneuronal': red}
+                    data=json.dumps(pyload)
+                    data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
+                    response = requests.post(url, data)
+                    self.configactual(data2)
+                    self.filesave(data)
+                    if response.status_code == 200:
+                        print(response.content)
+                    
+    def enviarvideo(self):
+        
+            if modo== "Video":
+                color=1
+                cont=1
+                brillo=1
 
-        else:
-            url = 'http://127.0.0.1:8000/configuracion/'
-            pyload = {'brillo': brillo, 'contraste': cont,
-                      'color': color, 'modo': modo, 'redneuronal': red}
-            data=json.dumps(pyload)
-            data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
-            response = requests.post(url, data)
-            self.configactual(data2)
-            self.filesave(data)
-            if response.status_code == 200:
-                print(response.content)
+            try:
+                modo
+                red
+                brillo
+                cont
+                color
+            except NameError: 
+                self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
+                self.showdialog()
+            else:
+
+                url = 'http://127.0.0.1:8000/configuracion/'
+                pyload = {'brillo': brillo, 'contraste': cont,
+                        'color': color, 'modo': modo, 'redneuronal': red}
+                data=json.dumps(pyload)
+                data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
+                response = requests.post(url, data)
+                self.configactual(data2)
+                self.filesave(data)
+                if response.status_code == 200:
+                    print(response.content)
+     
 
     def showdialog(self):
         dialog = QDialog(self)

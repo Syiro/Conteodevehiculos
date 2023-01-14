@@ -117,13 +117,14 @@
 /* === Basic types === */
 
 #ifndef U_HIDE_INTERNAL_API
-struct UPlugData;
 /**
  * @{
- * Typedef for opaque structure passed to/from a plugin. 
- * Use the APIs to access it.
+ * Opaque structure passed to/from a plugin. 
+ * use the APIs to access it.
  * @internal ICU 4.4 Technology Preview
  */
+
+struct UPlugData;
 typedef struct UPlugData UPlugData;
 
 /** @} */
@@ -207,7 +208,7 @@ typedef UPlugTokenReturn (U_EXPORT2 UPlugEntrypoint) (
  * @param dontUnload  set true if this plugin can't be unloaded
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void U_EXPORT2 
+U_INTERNAL void U_EXPORT2 
 uplug_setPlugNoUnload(UPlugData *plug, UBool dontUnload);
 
 /**
@@ -216,7 +217,7 @@ uplug_setPlugNoUnload(UPlugData *plug, UBool dontUnload);
  * @param level the level of this plugin
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void U_EXPORT2
+U_INTERNAL void U_EXPORT2
 uplug_setPlugLevel(UPlugData *plug, UPlugLevel level);
 
 /**
@@ -225,7 +226,7 @@ uplug_setPlugLevel(UPlugData *plug, UPlugLevel level);
  * @return the level of this plugin
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UPlugLevel U_EXPORT2
+U_INTERNAL UPlugLevel U_EXPORT2
 uplug_getPlugLevel(UPlugData *plug);
 
 /**
@@ -235,7 +236,7 @@ uplug_getPlugLevel(UPlugData *plug);
  * @return the lowest level of plug which can currently load
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UPlugLevel U_EXPORT2
+U_INTERNAL UPlugLevel U_EXPORT2
 uplug_getCurrentLevel(void);
 
 
@@ -244,7 +245,7 @@ uplug_getCurrentLevel(void);
  * @return The error code of this plugin's load attempt.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UErrorCode U_EXPORT2
+U_INTERNAL UErrorCode U_EXPORT2
 uplug_getPlugLoadStatus(UPlugData *plug); 
 
 /**
@@ -253,7 +254,7 @@ uplug_getPlugLoadStatus(UPlugData *plug);
  * @param name the name of this plugin. The first UPLUG_NAME_MAX characters willi be copied into a new buffer.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void U_EXPORT2
+U_INTERNAL void U_EXPORT2
 uplug_setPlugName(UPlugData *plug, const char *name);
 
 /**
@@ -262,7 +263,7 @@ uplug_setPlugName(UPlugData *plug, const char *name);
  * @return the name of this plugin
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI const char * U_EXPORT2
+U_INTERNAL const char * U_EXPORT2
 uplug_getPlugName(UPlugData *plug);
 
 /**
@@ -271,7 +272,7 @@ uplug_getPlugName(UPlugData *plug);
  * @return the symbol name, or NULL
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI const char * U_EXPORT2
+U_INTERNAL const char * U_EXPORT2
 uplug_getSymbolName(UPlugData *plug);
 
 /**
@@ -281,7 +282,7 @@ uplug_getSymbolName(UPlugData *plug);
  * @return the library name, or NULL
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI const char * U_EXPORT2
+U_INTERNAL const char * U_EXPORT2
 uplug_getLibraryName(UPlugData *plug, UErrorCode *status);
 
 /**
@@ -291,7 +292,7 @@ uplug_getLibraryName(UPlugData *plug, UErrorCode *status);
  * @return the library, or NULL
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void * U_EXPORT2
+U_INTERNAL void * U_EXPORT2
 uplug_getLibrary(UPlugData *plug);
 
 /**
@@ -300,7 +301,7 @@ uplug_getLibrary(UPlugData *plug);
  * @return the context, or NULL if not set
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void * U_EXPORT2
+U_INTERNAL void * U_EXPORT2
 uplug_getContext(UPlugData *plug);
 
 /**
@@ -309,7 +310,7 @@ uplug_getContext(UPlugData *plug);
  * @param context new context to set
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void U_EXPORT2
+U_INTERNAL void U_EXPORT2
 uplug_setContext(UPlugData *plug, void *context);
 
 
@@ -320,7 +321,7 @@ uplug_setContext(UPlugData *plug, void *context);
  * @return configuration string, or else null.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI const char * U_EXPORT2
+U_INTERNAL const char * U_EXPORT2
 uplug_getConfiguration(UPlugData *plug);
 
 /**
@@ -338,7 +339,7 @@ uplug_getConfiguration(UPlugData *plug);
  * @return the next oldest plugin, or NULL if no more.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UPlugData* U_EXPORT2
+U_INTERNAL UPlugData* U_EXPORT2
 uplug_nextPlug(UPlugData *prior);
 
 /**
@@ -353,7 +354,7 @@ uplug_nextPlug(UPlugData *prior);
  * @return the new UPlugData associated with this plugin, or NULL if error.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UPlugData* U_EXPORT2
+U_INTERNAL UPlugData* U_EXPORT2
 uplug_loadPlugFromEntrypoint(UPlugEntrypoint *entrypoint, const char *config, UErrorCode *status);
 
 
@@ -367,7 +368,7 @@ uplug_loadPlugFromEntrypoint(UPlugEntrypoint *entrypoint, const char *config, UE
  * @return the new UPlugData associated with this plugin, or NULL if error.
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI UPlugData* U_EXPORT2
+U_INTERNAL UPlugData* U_EXPORT2
 uplug_loadPlugFromLibrary(const char *libName, const char *sym, const char *config, UErrorCode *status);
 
 /**
@@ -377,7 +378,7 @@ uplug_loadPlugFromLibrary(const char *libName, const char *sym, const char *conf
  * @param status error result
  * @internal ICU 4.4 Technology Preview
  */
-U_CAPI void U_EXPORT2
+U_INTERNAL void U_EXPORT2
 uplug_removePlug(UPlugData *plug, UErrorCode *status);
 #endif  /* U_HIDE_INTERNAL_API */
 

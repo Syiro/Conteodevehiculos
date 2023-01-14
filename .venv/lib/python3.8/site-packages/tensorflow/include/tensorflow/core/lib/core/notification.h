@@ -18,6 +18,6 @@ limitations under the License.
 
 // Notification implementation is platform-dependent, to support
 // alternative synchronization primitives.
-#include "tensorflow/core/platform/notification.h"  // IWYU pragma: export
+#include "tensorflow/core/platform/notification.h"
 
 #endif  // TENSORFLOW_CORE_LIB_CORE_NOTIFICATION_H_

@@ -29,10 +29,7 @@
 #include "unicode/utf16.h"
 #include "unicode/uenum.h"
 #include "unicode/ucnv.h"
-
-#if U_SHOW_CPLUSPLUS_API
 #include "unicode/localpointer.h"
-#endif   // U_SHOW_CPLUSPLUS_API
 
 /**
  * \file
@@ -45,11 +42,11 @@
  * from the serialized form.
  */
 
-struct UConverterSelector;
 /**
  * @{
- * Typedef for selector data structure.
+ * The selector data structure
  */
+struct UConverterSelector;
 typedef struct UConverterSelector UConverterSelector;
 /** @} */
 
@@ -75,7 +72,7 @@ typedef struct UConverterSelector UConverterSelector;
  *
  * @stable ICU 4.2
  */
-U_CAPI UConverterSelector* U_EXPORT2
+U_STABLE UConverterSelector* U_EXPORT2
 ucnvsel_open(const char* const*  converterList, int32_t converterListSize,
              const USet* excludedCodePoints,
              const UConverterUnicodeSet whichSet, UErrorCode* status);
@@ -93,7 +90,7 @@ ucnvsel_open(const char* const*  converterList, int32_t converterListSize,
  *
  * @stable ICU 4.2
  */
-U_CAPI void U_EXPORT2
+U_STABLE void U_EXPORT2
 ucnvsel_close(UConverterSelector *sel);
 
 #if U_SHOW_CPLUSPLUS_API
@@ -130,7 +127,7 @@ U_NAMESPACE_END
  *
  * @stable ICU 4.2
  */
-U_CAPI UConverterSelector* U_EXPORT2
+U_STABLE UConverterSelector* U_EXPORT2
 ucnvsel_openFromSerialized(const void* buffer, int32_t length, UErrorCode* status);
 
 /**
@@ -147,7 +144,7 @@ ucnvsel_openFromSerialized(const void* buffer, int32_t length, UErrorCode* statu
  *
  * @stable ICU 4.2
  */
-U_CAPI int32_t U_EXPORT2
+U_STABLE int32_t U_EXPORT2
 ucnvsel_serialize(const UConverterSelector* sel,
                   void* buffer, int32_t bufferCapacity, UErrorCode* status);
 
@@ -165,7 +162,7 @@ ucnvsel_serialize(const UConverterSelector* sel,
  *
  * @stable ICU 4.2
  */
-U_CAPI UEnumeration * U_EXPORT2
+U_STABLE UEnumeration * U_EXPORT2
 ucnvsel_selectForString(const UConverterSelector* sel,
                         const UChar *s, int32_t length, UErrorCode *status);
 
@@ -183,7 +180,7 @@ ucnvsel_selectForString(const UConverterSelector* sel,
  *
  * @stable ICU 4.2
  */
-U_CAPI UEnumeration * U_EXPORT2
+U_STABLE UEnumeration * U_EXPORT2
 ucnvsel_selectForUTF8(const UConverterSelector* sel,
                       const char *s, int32_t length, UErrorCode *status);
 

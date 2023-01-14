@@ -18,9 +18,18 @@ limitations under the License.
 #include <atomic>
 
 #include "tensorflow/core/platform/types.h"
-#include "tensorflow/tsl/framework/shared_counter.h"
 
 namespace tensorflow {
-using tsl::SharedCounter;  // NOLINT
+// A lightweight thread-safe monotone counter for establishing
+// temporal ordering.
+class SharedCounter {
+ public:
+  int64_t get() { return value_; }
+  int64_t next() { return ++value_; }
+
+ private:
+  std::atomic<int64_t> value_{0};
+};
+
 }  // namespace tensorflow
 #endif  // TENSORFLOW_CORE_COMMON_RUNTIME_SHARED_COUNTER_H_

@@ -44,6 +44,6 @@ public:
   virtual bool shouldMaterializeInto(Region *region) const { return false; }
 };
 
-} // namespace mlir
+} // end namespace mlir
 
 #endif // MLIR_INTERFACES_FOLDINTERFACES_H_

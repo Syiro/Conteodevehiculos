@@ -16,12 +16,12 @@ limitations under the License.
 #ifndef TENSORFLOW_CORE_PLATFORM_THREADPOOL_INTERFACE_H_
 #define TENSORFLOW_CORE_PLATFORM_THREADPOOL_INTERFACE_H_
 
-#include "tensorflow/tsl/platform/threadpool_interface.h"
+#include "third_party/eigen3/unsupported/Eigen/CXX11/ThreadPool"
 
 namespace tensorflow {
 namespace thread {
 
-using ThreadPoolInterface = tsl::thread::ThreadPoolInterface;
+class ThreadPoolInterface : public Eigen::ThreadPoolInterface {};
 
 }  // namespace thread
 }  // namespace tensorflow

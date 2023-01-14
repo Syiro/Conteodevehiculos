@@ -1,4 +1,4 @@
-# Copyright 2016 Google Inc.
+# Copyright 2016 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,9 +29,21 @@ import abc
 import six
 from six.moves import http_client
 
+TOO_MANY_REQUESTS = 429  # Python 2.7 six is missing this status code.
+
+DEFAULT_RETRYABLE_STATUS_CODES = (
+    http_client.INTERNAL_SERVER_ERROR,
+    http_client.SERVICE_UNAVAILABLE,
+    http_client.REQUEST_TIMEOUT,
+    TOO_MANY_REQUESTS,
+)
+"""Sequence[int]:  HTTP status codes indicating a request can be retried.
+"""
+
+
 DEFAULT_REFRESH_STATUS_CODES = (http_client.UNAUTHORIZED,)
 """Sequence[int]:  Which HTTP status code indicate that credentials should be
-refreshed and a request should be retried.
+refreshed.
 """
 
 DEFAULT_MAX_REFRESH_ATTEMPTS = 2
@@ -45,17 +57,17 @@ class Response(object):
     @abc.abstractproperty
     def status(self):
         """int: The HTTP status code."""
-        raise NotImplementedError('status must be implemented.')
+        raise NotImplementedError("status must be implemented.")
 
     @abc.abstractproperty
     def headers(self):
         """Mapping[str, str]: The HTTP response headers."""
-        raise NotImplementedError('headers must be implemented.')
+        raise NotImplementedError("headers must be implemented.")
 
     @abc.abstractproperty
     def data(self):
         """bytes: The response body."""
-        raise NotImplementedError('data must be implemented.')
+        raise NotImplementedError("data must be implemented.")
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -69,8 +81,9 @@ class Request(object):
     """
 
     @abc.abstractmethod
-    def __call__(self, url, method='GET', body=None, headers=None,
-                 timeout=None, **kwargs):
+    def __call__(
+        self, url, method="GET", body=None, headers=None, timeout=None, **kwargs
+    ):
         """Make an HTTP request.
 
         Args:
@@ -93,4 +106,4 @@ class Request(object):
         """
         # pylint: disable=redundant-returns-doc, missing-raises-doc
         # (pylint doesn't play well with abstract docstrings.)
-        raise NotImplementedError('__call__ must be implemented.')
+        raise NotImplementedError("__call__ must be implemented.")

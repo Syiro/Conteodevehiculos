@@ -101,7 +101,7 @@ private:
      */
     UBool latin1Contains[0x100];
 
-    /* true if contains(U+FFFD). */
+    /* TRUE if contains(U+FFFD). */
     UBool containsFFFD;
 
     /*

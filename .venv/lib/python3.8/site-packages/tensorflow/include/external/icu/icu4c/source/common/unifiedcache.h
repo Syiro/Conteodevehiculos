@@ -34,13 +34,13 @@ class UnifiedCache;
  */
 class U_COMMON_API CacheKeyBase : public UObject {
  public:
-   CacheKeyBase() : fCreationStatus(U_ZERO_ERROR), fIsPrimary(false) {}
+   CacheKeyBase() : fCreationStatus(U_ZERO_ERROR), fIsMaster(FALSE) {}
 
    /**
     * Copy constructor. Needed to support cloning.
     */
    CacheKeyBase(const CacheKeyBase &other) 
-           : UObject(other), fCreationStatus(other.fCreationStatus), fIsPrimary(false) { }
+           : UObject(other), fCreationStatus(other.fCreationStatus), fIsMaster(FALSE) { }
    virtual ~CacheKeyBase();
 
    /**
@@ -88,7 +88,7 @@ class U_COMMON_API CacheKeyBase : public UObject {
    }
  private:
    mutable UErrorCode fCreationStatus;
-   mutable UBool fIsPrimary;
+   mutable UBool fIsMaster;
    friend class UnifiedCache;
 };
 
@@ -147,10 +147,10 @@ class LocaleCacheKey : public CacheKey<T> {
    virtual UBool operator == (const CacheKeyBase &other) const {
        // reflexive
        if (this == &other) {
-           return true;
+           return TRUE;
        }
        if (!CacheKey<T>::operator == (other)) {
-           return false;
+           return FALSE;
        }
        // We know this and other are of same class because operator== on
        // CacheKey returned true.
@@ -359,7 +359,7 @@ class U_COMMON_API UnifiedCache : public UnifiedCacheBase {
    
    /**
     * Flushes the contents of the cache. If cache values hold references to other
-    * cache values then _flush should be called in a loop until it returns false.
+    * cache values then _flush should be called in a loop until it returns FALSE.
     * 
     * On entry, gCacheMutex must be held.
     * On exit, those values with are evictable are flushed.
@@ -370,7 +370,7 @@ class U_COMMON_API UnifiedCache : public UnifiedCacheBase {
     *                     hard (external) references are not deleted, but are detached from
     *                     the cache, so that a subsequent removeRefs can delete them.
     *                     _flush is not thread safe when all is true.
-    *   @return true if any value in cache was flushed or false otherwise.
+    *   @return TRUE if any value in cache was flushed or FALSE otherwise.
     */
    UBool _flush(UBool all) const;
    
@@ -395,11 +395,11 @@ class U_COMMON_API UnifiedCache : public UnifiedCacheBase {
      * Attempts to fetch value and status for key from cache.
      * On entry, gCacheMutex must not be held value must be NULL and status must
      * be U_ZERO_ERROR.
-     * On exit, either returns false (In this
-     * case caller should try to create the object) or returns true with value
+     * On exit, either returns FALSE (In this
+     * case caller should try to create the object) or returns TRUE with value
      * pointing to the fetched value and status set to fetched status. When
-     * false is returned status may be set to failure if an in progress hash
-     * entry could not be made but value will remain unchanged. When true is
+     * FALSE is returned status may be set to failure if an in progress hash
+     * entry could not be made but value will remain unchanged. When TRUE is
      * returned, caller must call removeRef() on value.
      */
     UBool _poll(
@@ -463,17 +463,17 @@ class U_COMMON_API UnifiedCache : public UnifiedCacheBase {
    void _runEvictionSlice() const;
  
    /**
-    * Register a primary cache entry. A primary key is the first key to create
+    * Register a master cache entry. A master key is the first key to create
     * a given  SharedObject value. Subsequent keys whose create function
-    * produce referneces to an already existing SharedObject are not primary -
+    * produce referneces to an already existing SharedObject are not masters -
     * they can be evicted and subsequently recreated.
     * 
     * On entry, gCacheMutex must be held.
-    * On exit, items in use count incremented, entry is marked as a primary
+    * On exit, items in use count incremented, entry is marked as a master
     * entry, and value registered with cache so that subsequent calls to
     * addRef() and removeRef() on it correctly interact with the cache.
     */
-   void _registerPrimary(const CacheKeyBase *theKey, const SharedObject *value) const;
+   void _registerMaster(const CacheKeyBase *theKey, const SharedObject *value) const;
         
    /**
     * Store a value and creation error status in given hash entry.

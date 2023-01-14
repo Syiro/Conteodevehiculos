@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef MLIR_DIALECT_TOSA_UTILS_QUANTUTILS_H
-#define MLIR_DIALECT_TOSA_UTILS_QUANTUTILS_H
+#ifndef DIALECT_TOSA_UTILS_QUANT_UTILS_H
+#define DIALECT_TOSA_UTILS_QUANT_UTILS_H
 
 #include "mlir/Dialect/Tosa/IR/TosaOps.h"
 
@@ -68,4 +68,4 @@ TypeAttr buildQTypeAttrFromMinMax(OpBuilder builder, Type inputDType,
 } // namespace tosa
 } // namespace mlir
 
-#endif // MLIR_DIALECT_TOSA_UTILS_QUANTUTILS_H
+#endif // DIALECT_TOSA_UTILS_QUANT_UTILS_H

@@ -54,7 +54,7 @@ public:
     struct RBBIRuleChar {
         UChar32             fChar;
         UBool               fEscaped;
-        RBBIRuleChar() : fChar(0), fEscaped(false) {}
+        RBBIRuleChar() : fChar(0), fEscaped(FALSE) {}
     };
 
     RBBIRuleScanner(RBBIRuleBuilder  *rb);
@@ -72,8 +72,6 @@ public:
                                                     //   trees, one each for the forward and
                                                     //   reverse rules,
                                                     //   and a list of UnicodeSets encountered.
-
-    int32_t     numRules();                         // Return the number of rules that have been seen.
 
     /**
      * Return a rules string without unnecessary

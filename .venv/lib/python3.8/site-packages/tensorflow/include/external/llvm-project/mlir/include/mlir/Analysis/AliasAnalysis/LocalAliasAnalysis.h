@@ -29,6 +29,6 @@ public:
   /// Return the modify-reference behavior of `op` on `location`.
   ModRefResult getModRef(Operation *op, Value location);
 };
-} // namespace mlir
+} // end namespace mlir
 
 #endif // MLIR_ANALYSIS_ALIASANALYSIS_LOCALALIASANALYSIS_H_

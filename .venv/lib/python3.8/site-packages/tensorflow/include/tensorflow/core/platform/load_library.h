@@ -16,15 +16,16 @@ limitations under the License.
 #ifndef TENSORFLOW_CORE_PLATFORM_LOAD_LIBRARY_H_
 #define TENSORFLOW_CORE_PLATFORM_LOAD_LIBRARY_H_
 
-#include "tensorflow/tsl/platform/load_library.h"
+#include "tensorflow/core/platform/status.h"
 
 namespace tensorflow {
 
 namespace internal {
 
-using ::tsl::internal::FormatLibraryFileName;
-using ::tsl::internal::GetSymbolFromLibrary;
-using ::tsl::internal::LoadDynamicLibrary;
+Status LoadDynamicLibrary(const char* library_filename, void** handle);
+Status GetSymbolFromLibrary(void* handle, const char* symbol_name,
+                            void** symbol);
+string FormatLibraryFileName(const string& name, const string& version);
 
 }  // namespace internal
 

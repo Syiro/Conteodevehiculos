@@ -17,6 +17,7 @@ namespace mlir {
 class MLIRContext;
 class SPIRVTypeConverter;
 class RewritePatternSet;
+using OwningRewritePatternList = RewritePatternSet;
 
 /// Appends to a pattern list additional patterns for translating Linalg ops to
 /// SPIR-V ops.

@@ -31,6 +31,7 @@ limitations under the License.
 
 namespace tensorflow {
 
+class Allocator;
 class PluggableDeviceBFCAllocator;
 class PluggableDeviceSimpleAllocator;
 class PoolAllocator;

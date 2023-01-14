@@ -32,7 +32,7 @@ parseEnumKeywordAttr(EnumClass &value, ParserType &parser,
   if (parser.parseKeyword(&keyword))
     return failure();
   if (Optional<EnumClass> attr = spirv::symbolizeEnum<EnumClass>(keyword)) {
-    value = *attr;
+    value = attr.getValue();
     return success();
   }
   return parser.emitError(loc, "invalid ")

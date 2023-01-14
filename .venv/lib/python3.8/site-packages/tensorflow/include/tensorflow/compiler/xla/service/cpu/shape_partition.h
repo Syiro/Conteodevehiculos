@@ -81,8 +81,9 @@ class ShapePartitionAssigner {
 // 'shape' as specified by 'dimension_partition_counts'.
 class ShapePartitionIterator {
  public:
-  ShapePartitionIterator(const Shape& shape,
-                         absl::Span<const int64_t> dimension_partition_counts);
+  ShapePartitionIterator(
+      const Shape& shape,
+      const std::vector<int64_t>& dimension_partition_counts);
 
   // Returns a partition [start, size] for each dimension.
   // Partitions are listed starting from outer-most dimension first.
