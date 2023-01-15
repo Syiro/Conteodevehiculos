@@ -52,4 +52,4 @@ if __name__ == "__main__":
     Root = MainWindow()
     Root.show()
     sys.exit(App.exec())
-    #subir al github
+    #subir al git
