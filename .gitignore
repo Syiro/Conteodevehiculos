@@ -1,5 +1,5 @@
 #ignore media files
-
+*.mp4
 #ignore zip files 
 *.zip
 
