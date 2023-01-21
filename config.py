@@ -38,7 +38,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         # comobo BOx implement
 
         self.comboBox.activated.connect(self.modo)
-        self.comboBox_4.activated.connect(self.red)
+       # self.comboBox_4.activated.connect(self.red)
 
         # horizonslider implement
 
@@ -63,7 +63,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         # stop button implement
         
         self.pushButton_13.clicked.connect(self.cancel)
-        
+
+        #selec red implement
+
+        self.pushButton.clicked.connect(self.abrirred)
+
+    def abrirred(self):
+        self.fileopen(type="red")
+
     def modoejecucion(self):
         
         if modo == "Imagenes":
@@ -187,7 +194,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         elif type =="Imagenes":
             fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)") 
             self.label_18.setPixmap(QPixmap(fname))
-            
+
+        elif type == "red":
+            pathname,b = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
+            Ejecucion.Cargaparametros(self,pathmodel=pathname)
+            global red
+            red = pathname
+            self.label_28.setText(pathname)
+
         elif type =="Tiempo real":
             print("proximamente")
             fname=""
@@ -269,15 +283,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
             self.radioButton_2.setChecked(True)
         return modo
 
-    def red(self):
-        global red
-        combobox = self.sender()
-        if combobox.currentText() == "SSD Movilnet 2.0 fpnlite":
-            red = "SSD Movilnet 2.0 fpnlite"
-        if combobox.currentText() == "Red2":
-            red = "Red2"
-        if combobox.currentText() == "Red3":
-            red = "Red3"
+    # def red(self):
+    #     global red
+    #     combobox = self.sender()
+    #     if combobox.currentText() == "SSD Movilnet 2.0 fpnlite":
+    #         red = "SSD Movilnet 2.0 fpnlite"
+    #     if combobox.currentText() == "Red2":
+    #         red = "Red2"
+    #     if combobox.currentText() == "Red3":
+    #         red = "Red3"
 
     def enviar(self):
             if modo=="Video":
