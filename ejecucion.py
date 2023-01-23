@@ -47,14 +47,16 @@ class Ejecucion:
         zip_ref = zipfile.ZipFile(local_zip, "r")
         zip_ref.extractall("fine_tuned_model")
         zip_ref.close()
-        PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         global PATH_TO_SAVE_MODEL
+        PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
-       # detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
+        
+        #detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
+        #return 
 
     def Inferencia(self, img):
-
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
+        #detect_fn = self.Cargaparametros()
         label_map_pbtxt_fname = 'label_map.pbtxt'
         category_index = label_map_util.create_category_index_from_labelmap(
             label_map_pbtxt_fname)
@@ -101,15 +103,15 @@ class Ejecucion:
         self.label_25.setText(str(count))
         # comentario de control ejje
 
-    def Inferencia_video(self, img):
+    def Inferencia_video(self, img, skipfps, treshold):
 
         PATH_VIDEO = img
 
         PATH_OUTPUT = "videocondetecciones.mp4"  # sacar a la interfaz
 
-        SKIP_FPS = 30  # sacar a la interfaz
+        SKIP_FPS = skipfps  # sacar a la interfaz
 
-        TRESHOLD = 0.5  # sacar a la interfaz
+        TRESHOLD = treshold # sacar a la interfaz
 
         vs = cv2.VideoCapture(PATH_VIDEO)
 
@@ -136,6 +138,7 @@ class Ejecucion:
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         writer = cv2.VideoWriter(PATH_OUTPUT, fourcc, 20.0, (W, H), True)
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
+        #detect_fn = self.Cargaparametros(pathmodel=pathmodelg)
         while True:
 
             ret, frame = vs.read()

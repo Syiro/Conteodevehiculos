@@ -24,7 +24,7 @@ Cython==0.29.33
 debugpy==1.6.5
 decorator==5.1.1
 defusedxml==0.7.1
-dlib==19.24.0
+
 docutils==0.19
 entrypoints==0.4
 executing==1.2.0

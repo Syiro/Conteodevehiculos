@@ -1,16 +1,21 @@
 import asyncio
 import json
 import sys
+import os
 import requests
 import uvicorn
 from configcolor import*
-from video import*
+#from video import*
 from ejecucion import Ejecucion
 from app import Conexion, main, models, schemas
 from untitled import *
-from PyQt5.QtWidgets import QApplication, QLabel, QDialog, QPushButton, QFileDialog
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QPixmap
+import cv2
+#export QT_QPA_PLATFORM=xcb
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["QT_QPA_PLATFORM"] = "xcb"
 
 
 class Work(QThread):
@@ -68,6 +73,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
 
         self.pushButton.clicked.connect(self.abrirred)
 
+        #guardar button implement
+
+        self.pushButton_2.clicked.connect(self.guardar)
+
+    def guardar(self):
+
+        skipfps=str(self.lineEdit.text())
+        treshold=str(self.lineEdit_2.text())
+        return skipfps , treshold
+
+
     def abrirred(self):
         self.fileopen(type="red")
 
@@ -78,10 +94,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
             self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
             self.Inferencia(img=fname)
             
-        if modo == "Video":
+        elif modo == "Video":
+            print("variables"+str(self.guardar()))
+            skipfps , treshold = self.guardar()
             self.Ejecucion_mode(modo=modo,red=red)
-            self.Inferencia_video(img=fname)
+            self.Inferencia_video(img=fname, skipfps=int(skipfps), treshold=float(treshold))
             self.start_video(a=1)
+        
+        else:
+            pass
 
  
          
