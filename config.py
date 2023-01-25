@@ -6,37 +6,66 @@ import requests
 import uvicorn
 from configcolor import*
 #from video import*
-from ejecucion import Ejecucion
+from ejecucion import *
 from app import Conexion, main, models, schemas
 from untitled import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
+import numpy as np
 #export QT_QPA_PLATFORM=xcb
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["QT_QPA_PLATFORM"] = "xcb"
 
+class VideoThread(QThread):
+    
+    change_pixmap_signal = pyqtSignal(np.ndarray)
 
-class Work(QThread):
-    Imageupd = pyqtSignal(QImage)
+    def __init__(self):
+        super().__init__()
+        self.__run_flag= True
+    
+    def stop(self):
+        self.__run_flag= False
+        self.wait()
+
     def run(self):
-        self.hilo_corriendo = True
+        # capture from web cam
         cap = cv2.VideoCapture(fname)
-        while self.hilo_corriendo:
-            ret, frame = cap.read()
+        while self.__run_flag:
+            ret, cv_img = cap.read()
             if ret:
-                Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                #flip = cv2.flip(Image, 1)
-                convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
+                self.change_pixmap_signal.emit(cv_img)
+        
+        cap.release()
+
+
+# class Worker(QObject):
+#     #signals of thread
+#     Imageupd = pyqtSignal(QImage)
+#     # @pyqtSlot()
+#     #long task
+#     @pyqtSlot(QImage)
+#     def run(self):
+#         self.hilo_corriendo = True
+#         cap = cv2.VideoCapture(fname)
+#         while self.hilo_corriendo:
+#             ret, frame = cap.read()
+#             if ret:
+#                 Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+#                 #flip = cv2.flip(Image, 1)
+#                 convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
             
-                pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-                self.Imageupd.emit(pic)
+#                 pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
+#                 self.Imageupd.emit(pic)
                 
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
+           
         self.setupUi(self)
         #text edit implment
         
@@ -76,6 +105,37 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
         #guardar button implement
 
         self.pushButton_2.clicked.connect(self.guardar)
+        
+
+    @pyqtSlot(np.ndarray)
+    def update_image(self, cv_img):
+        """Updates the image_label with a new opencv image"""
+        qt_img = self.convert_cv_qt(cv_img)
+        if b==1:
+            self.label_18.setPixmap(qt_img)
+            
+        else :
+            self.label_26.setPixmap(qt_img) 
+
+    def convert_cv_qt(self, cv_img):
+        """Convert from an opencv image to QPixmap"""
+        Image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        #flip = cv2.flip(Image,1)
+        convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
+        pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
+        return QPixmap.fromImage(pic)
+        
+        # Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        # flip = cv2.flip(Image, 1)
+        # convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
+        # pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
+        #convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
+        #p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
+        
+
+    def closeEvent(self, event):
+        self.thread.stop()
+        event.accept()
 
     def guardar(self):
 
@@ -90,37 +150,43 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow,ConfigColor,Ejecucion):
     def modoejecucion(self):
         
         if modo == "Imagenes":
-            self.Ejecucion_mode(modo=modo,red=red)
-            self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
-            self.Inferencia(img=fname)
+            Ejecucion.Ejecucion_mode(modo=modo,red=red)
+            Ejecucion.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
+            Ejecucion.Inferencia(img=fname)
             
         elif modo == "Video":
             print("variables"+str(self.guardar()))
             skipfps , treshold = self.guardar()
-            self.Ejecucion_mode(modo=modo,red=red)
-            self.Inferencia_video(img=fname, skipfps=int(skipfps), treshold=float(treshold))
+            Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
+            Ejecucion.Inferencia_video(self=self,img=fname, skipfps=int(skipfps), treshold=float(treshold))
             self.start_video(a=1)
-        
-        else:
-            pass
+    
 
  
          
     def start_video(self,a):
-        self.Work = Work()
-        self.Work.start()
+        self.thread = VideoThread()
+        self.thread.start()
+        global b , fname
         if a == 1:
-         global fname
-         fname = "videocondetecciones.mp4"
-         self.Work.Imageupd.connect(self.Imageupd_slot)
+             b=2
+             fname = "videocondetecciones.mp4"
+             
+             self.thread.change_pixmap_signal.connect(self.update_image)
+             
         else:
-            self.Work.Imageupd.connect(self.Imageupd_slotpre)
+           
+            b=1
+            self.thread.change_pixmap_signal.connect(self.update_image)
+  
+        a=0
+        #self.thread.finished.connect()
  
-    def Imageupd_slotpre(self, Image):
-        self.label_18.setPixmap(QPixmap.fromImage(Image))               
+    # def Imageupd_slotpre(self, Image):
+    #     self.label_18.setPixmap(QPixmap.fromImage(Image))               
 
-    def Imageupd_slot(self, Image):
-        self.label_26.setPixmap(QPixmap.fromImage(Image))
+    # def Imageupd_slot(self, Image):
+    #     self.label_26.setPixmap(QPixmap.fromImage(Image))
 
     def cancel(self):
         self.label_26.clear()

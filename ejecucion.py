@@ -30,8 +30,6 @@ from trackableobject import TrackableObject
 
 
 class Ejecucion:
-    def __init__(self):
-        pass
 
     def Ejecucion_mode(self, modo, red):
         self.label_24.setText(red)
