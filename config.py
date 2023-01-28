@@ -1,45 +1,26 @@
-import asyncio
+#librerias
 import json
 import sys
 import os
 import requests
-import uvicorn
+import cv2
+import numpy as np
+
+#paquetes
 from configcolor import*
-#from video import*
+from videothread import*
 from ejecucion import *
 from app import Conexion, main, models, schemas
 from untitled import *
+
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-import cv2
-import numpy as np
+
+
 #export QT_QPA_PLATFORM=xcb
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-os.environ["QT_QPA_PLATFORM"] = "xcb"
-
-class VideoThread(QThread):
-    
-    change_pixmap_signal = pyqtSignal(np.ndarray)
-
-    def __init__(self):
-        super().__init__()
-        self.__run_flag= True
-    
-    def stop(self):
-        self.__run_flag= False
-        self.wait()
-
-    def run(self):
-        # capture from web cam
-        cap = cv2.VideoCapture(fname)
-        while self.__run_flag:
-            ret, cv_img = cap.read()
-            if ret:
-                self.change_pixmap_signal.emit(cv_img)
-        
-        cap.release()
-                
+os.environ["QT_QPA_PLATFORM"] = "xcb"                
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
@@ -85,30 +66,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #guardar button implement
 
         self.pushButton_2.clicked.connect(self.guardar)
-        
-
-    @pyqtSlot(np.ndarray)
-    def update_image(self, cv_img):
-        """Updates the image_label with a new opencv image"""
-        qt_img = self.convert_cv_qt(cv_img)
-        if b==1:
-            self.label_18.setPixmap(qt_img)
-            
-        else :
-            self.label_26.setPixmap(qt_img) 
-
-    def convert_cv_qt(self, cv_img):
-        """Convert from an opencv image to QPixmap"""
-        Image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        #flip = cv2.flip(Image,1)
-        convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
-        pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-        return QPixmap.fromImage(pic)
-        
-
-    def closeEvent(self, event):
-        self.thread.stop()
-        event.accept()
 
     def guardar(self):
 
@@ -144,14 +101,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if a == 1:
              b=2
              fname = "videocondetecciones.mp4"
+             VideoConvert.change_pixmap_signal(VideoConvert.update_image)
+             self.thread.change_pixmap_signal(self.thread.update_image)
              
-             self.thread.change_pixmap_signal.connect(self.update_image)
              
         else:
            
             b=1
-            self.thread.change_pixmap_signal.connect(self.update_image)
-  
+            VideoConvert.change_pixmap_signal(VideoConvert.update_image)
+            self.thread.change_pixmap_signal(self.thread.update_image)
+            
         a=0
         #self.thread.finished.connect()
  
