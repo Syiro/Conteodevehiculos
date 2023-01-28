@@ -39,26 +39,6 @@ class VideoThread(QThread):
                 self.change_pixmap_signal.emit(cv_img)
         
         cap.release()
-
-
-# class Worker(QObject):
-#     #signals of thread
-#     Imageupd = pyqtSignal(QImage)
-#     # @pyqtSlot()
-#     #long task
-#     @pyqtSlot(QImage)
-#     def run(self):
-#         self.hilo_corriendo = True
-#         cap = cv2.VideoCapture(fname)
-#         while self.hilo_corriendo:
-#             ret, frame = cap.read()
-#             if ret:
-#                 Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#                 #flip = cv2.flip(Image, 1)
-#                 convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
-            
-#                 pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-#                 self.Imageupd.emit(pic)
                 
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -124,13 +104,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
         pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
         return QPixmap.fromImage(pic)
-        
-        # Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # flip = cv2.flip(Image, 1)
-        # convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
-        # pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-        #convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        #p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
         
 
     def closeEvent(self, event):
