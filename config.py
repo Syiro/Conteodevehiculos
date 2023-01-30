@@ -4,9 +4,11 @@ import sys
 import os
 import requests
 import uvicorn
+
 from configcolor import*
 #from video import*
 from ejecucion import *
+
 from app import Conexion, main, models, schemas
 from untitled import *
 from PyQt5.QtGui import *
@@ -106,6 +108,35 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pushButton_2.clicked.connect(self.guardar)
         
+        self.pushButton_6.clicked.connect(self.auto)
+
+        self.pushButton_7.clicked.connect(self.reseteo)
+    
+    def auto(self):
+        global color, cont, brillo ,red 
+        color=10
+        cont=10
+        brillo=10
+        pathname = "fine_tuned_model.zip"
+        red = pathname
+        self.lineEdit.setText("30")
+        self.lineEdit_2.setText("0.3")
+        self.horizontalSlider_4.setValue(brillo)
+        self.horizontalSlider_5.setValue(cont)
+        self.horizontalSlider_6.setValue(color)
+        Ejecucion.Cargaparametros(self,pathmodel=pathname)
+        self.label_28.setText(pathname)
+        if modo == "Imagenes" :
+            self.enviar()
+        elif modo == "Video":
+            self.enviarvideo()
+
+        
+
+    def reseteo(self):
+
+
+        pass
 
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
@@ -150,9 +181,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def modoejecucion(self):
         
         if modo == "Imagenes":
-            Ejecucion.Ejecucion_mode(modo=modo,red=red)
-            Ejecucion.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
-            Ejecucion.Inferencia(img=fname)
+            Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
+            Ejecucion.Mostrar_img(self=self,fname=fname,brillo=brillo,color=color,cont=cont)
+            Ejecucion.Inferencia(self=self,img=fname)
             
         elif modo == "Video":
             print("variables"+str(self.guardar()))
@@ -256,15 +287,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     
     def configuracionbrillo(self,path,brillo):
-        pathout = self.configbrillo(path=path,brillo=brillo)
+        pathout = ConfigColor.configbrillo(self, path=path,brillo=brillo)
         return pathout
     
     def configuracioncontraste(self,path,cont):
-        pathout = self.configcontraste(path=path,contraste=cont)
+        pathout = ConfigColor.configcontraste(self, path=path,contraste=cont)
         return pathout
     
     def configuracioncolor(self,path,color):
-        pathout = self.configcolor(path=path,color=color)
+        pathout = ConfigColor.configcolor(self, path=path,color=color)
         return pathout
         
       
@@ -276,10 +307,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cont=1
             brillo=1
             fname,b = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)")
+            self.frame_3.setDisabled(True)
             self.start_video(a=2) 
 
         elif type =="Imagenes":
-            fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)") 
+            fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)")
+            self.frame_3.setEnabled(True)
             self.label_18.setPixmap(QPixmap(fname))
 
         elif type == "red":
@@ -315,6 +348,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     #     self.label_18.setPixmap(QPixmap(self.convertimage(fname,brillo,cont,color)))
     
     def brillo(self):
+
         global brillo,cont,color
         cont=10
         color=10

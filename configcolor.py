@@ -1,4 +1,6 @@
 from PIL import Image, ImageEnhance, ImageOps
+
+
 class ConfigColor:
     def __init__(self,brillo,contraste,color):
         self.brillo=brillo
