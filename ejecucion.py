@@ -27,7 +27,8 @@ from imutils.video import VideoStream
 from imutils.video import FPS
 from centroidtracker import CentroidTracker
 from trackableobject import TrackableObject
-
+from datetime import date
+from datetime import datetime
 
 class Ejecucion:
 
@@ -98,7 +99,18 @@ class Ejecucion:
         for i in detections['detection_scores']:
             if i > 0.30:
                 count = count+1
+        
+        url = 'http://127.0.0.1:8000/datossemaforo/'
+        pyload = {'idcarros':count,'fecha':str(datetime.now())}
+        data=json.dumps(pyload) 
+        response = requests.post(url, data)   
+        
+        if response.status_code == 200:
+            print(response.content)   
+         
         self.label_25.setText(str(count))
+        
+        
         # comentario de control ejje
 
     def Inferencia_video(self, img, skipfps, treshold):

@@ -110,17 +110,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         self.pushButton_6.clicked.connect(self.auto)
 
-        self.pushButton_7.clicked.connect(self.reseteo)
+       # self.pushButton_7.clicked.connect(self.reseteo)
     
     def auto(self):
-        global color, cont, brillo ,red 
+        global color, cont, brillo ,red ,skipfps , treshold
         color=10
         cont=10
         brillo=10
+        skipfps=30
+        treshold=0.3
         pathname = "fine_tuned_model.zip"
         red = pathname
-        self.lineEdit.setText("30")
-        self.lineEdit_2.setText("0.3")
+        self.lineEdit.setText(skipfps)
+        self.lineEdit_2.setText(treshold)
         self.horizontalSlider_4.setValue(brillo)
         self.horizontalSlider_5.setValue(cont)
         self.horizontalSlider_6.setValue(color)
@@ -169,10 +171,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         event.accept()
 
     def guardar(self):
-
+        
+        
+        global skipfps, treshold
+        
         skipfps=str(self.lineEdit.text())
         treshold=str(self.lineEdit_2.text())
         return skipfps , treshold
+        
+       
 
 
     def abrirred(self):
@@ -424,6 +431,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     brillo
                     cont
                     color
+                    skipfps 
+                    treshold
                 except NameError: 
                     self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
                     self.showdialog()
@@ -431,7 +440,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     url = 'http://127.0.0.1:8000/configuracion/'
                     pyload = {'brillo': brillo, 'contraste': cont,
-                            'color': color, 'modo': modo, 'redneuronal': red}
+                            'color': color, 'modo': modo, 'redneuronal': red , 'skipfps': skipfps, 'treshold':treshold}
                     data=json.dumps(pyload)
                     data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
                     response = requests.post(url, data)
@@ -453,6 +462,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 brillo
                 cont
                 color
+                skipfps
+                treshold
             except NameError: 
                 self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
                 self.showdialog()
@@ -460,7 +471,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 url = 'http://127.0.0.1:8000/configuracion/'
                 pyload = {'brillo': brillo, 'contraste': cont,
-                        'color': color, 'modo': modo, 'redneuronal': red}
+                        'color': color, 'modo': modo, 'redneuronal': red ,'skipfps': skipfps, 'treshold':treshold}
                 data=json.dumps(pyload)
                 data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
                 response = requests.post(url, data)

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String , Float
 from app.Conexion import Base
 
 class configuracion(Base):
@@ -11,3 +11,11 @@ class configuracion(Base):
     color = Column(Integer)
     modo = Column(String(45))
     redneuronal = Column(String(45))
+    skipfps = Column(Integer)
+    treshold = Column(Float)
+    
+class datossemaforo(Base):
+    __tablename__='datossemaforo'
+    idusuarios = Column(Integer, primary_key=True)
+    idcarros = Column(Integer)
+    fecha = Column(String(45))
