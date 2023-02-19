@@ -8,7 +8,7 @@ import uvicorn
 from configcolor import*
 #from video import*
 from ejecucion import *
-
+import pafy
 from app import Conexion, main, models, schemas
 from untitled import *
 from PyQt5.QtGui import *
@@ -19,7 +19,8 @@ import numpy as np
 #export QT_QPA_PLATFORM=xcb
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["QT_QPA_PLATFORM"] = "xcb"
-
+#os.environ["PAFY_BACKEND"] = "internal"
+#to open designer on venv qt5-tools designer
 class VideoThread(QThread):
     
     change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -33,40 +34,45 @@ class VideoThread(QThread):
         self.wait()
 
     def run(self):
-        # capture from web cam
-        cap = cv2.VideoCapture(fname)
-        while self.__run_flag:
-            ret, cv_img = cap.read()
-            if ret:
-                self.change_pixmap_signal.emit(cv_img)
         
-        cap.release()
-
-
-# class Worker(QObject):
-#     #signals of thread
-#     Imageupd = pyqtSignal(QImage)
-#     # @pyqtSlot()
-#     #long task
-#     @pyqtSlot(QImage)
-#     def run(self):
-#         self.hilo_corriendo = True
-#         cap = cv2.VideoCapture(fname)
-#         while self.hilo_corriendo:
-#             ret, frame = cap.read()
-#             if ret:
-#                 Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-#                 #flip = cv2.flip(Image, 1)
-#                 convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
+        if tiemporeal==True:
+    
+            video = pafy.new(fname)
+            best = video.getbest(preftype='mp4')
+            cap = cv2.VideoCapture(best.url)
             
-#                 pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-#                 self.Imageupd.emit(pic)
+            while self.__run_flag:
+                 ret, cv_img = cap.read()
+                 if ret:
+                    self.change_pixmap_signal.emit(cv_img)
+            cap.release()
+            
+        else:    
+            print("entro a la clase videotrhead para video archivo")
+            cap = cv2.VideoCapture(fname)
+            while self.__run_flag:
+                ret, cv_img = cap.read()
+                if ret:
+                    self.change_pixmap_signal.emit(cv_img)
+            cap.release()
                 
+        
+            
+
+
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs)
+        
+        
+        #conectar con el url
+        
+        self.url_dialog = URLDialog(self) # instancia de la clase URLDialog
+        
+        # Conectar la señal urlEntered de URLDialog al método on_url_entered de MainWindow
+        self.url_dialog.urlEntered.connect(self.on_url_entered)
            
         self.setupUi(self)
         #text edit implment
@@ -98,7 +104,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         # stop button implement
         
-        self.pushButton_13.clicked.connect(self.cancel)
+        self.pushButton_13.clicked.connect(self.closeEvent)
 
         #selec red implement
 
@@ -133,41 +139,27 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif modo == "Video":
             self.enviarvideo()
 
-        
-
-    def reseteo(self):
-
-
-        pass
-
     @pyqtSlot(np.ndarray)
     def update_image(self, cv_img):
         """Updates the image_label with a new opencv image"""
         qt_img = self.convert_cv_qt(cv_img)
-        if b==1:
+        if b==1: #condicion videos cargados para vizualizar en config
             self.label_18.setPixmap(qt_img)
             
-        else :
+        else  : #condicion videos cargados para ejecucion
             self.label_26.setPixmap(qt_img) 
+            
 
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
         Image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
-        #flip = cv2.flip(Image,1)
         convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
         pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
         return QPixmap.fromImage(pic)
-        
-        # Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        # flip = cv2.flip(Image, 1)
-        # convertir_QT = QImage(Image.data, Image.shape[1], Image.shape[0], QImage.Format_RGB888)
-        # pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
-        #convert_to_Qt_format = QtGui.QImage(rgb_image.data, w, h, bytes_per_line, QtGui.QImage.Format_RGB888)
-        #p = convert_to_Qt_format.scaled(self.disply_width, self.display_height, Qt.KeepAspectRatio)
-        
 
     def closeEvent(self, event):
         self.thread.stop()
+        self.label_26.clear()
         event.accept()
 
     def guardar(self):
@@ -190,7 +182,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if modo == "Imagenes":
             Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
             Ejecucion.Mostrar_img(self=self,fname=fname,brillo=brillo,color=color,cont=cont)
-            Ejecucion.Inferencia(self=self,img=fname)
+            skipfps , tresholdp = self.guardar()
+            Ejecucion.Inferencia(self=self,img=fname, treshold=tresholdp)
             
         elif modo == "Video":
             print("variables"+str(self.guardar()))
@@ -198,37 +191,32 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
             Ejecucion.Inferencia_video(self=self,img=fname, skipfps=int(skipfps), treshold=float(treshold))
             self.start_video(a=1)
-    
+            
+        elif modo == "Video en Tiempo real":
+            skipfps , treshold = self.guardar()
+            Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
+            Ejecucion.Inferencia_videostream(self=self,img=fname, skipfps=int(skipfps), treshold=float(treshold))
+            self.start_video(a=1)
+            
+        
 
- 
          
     def start_video(self,a):
         self.thread = VideoThread()
         self.thread.start()
-        global b , fname
+        global b , fname, tiemporeal
         if a == 1:
              b=2
              fname = "videocondetecciones.mp4"
-             
+             tiemporeal=False
              self.thread.change_pixmap_signal.connect(self.update_image)
              
-        else:
-           
+        else: #previsualizacion videos cargados de archivo
             b=1
             self.thread.change_pixmap_signal.connect(self.update_image)
-  
         a=0
-        #self.thread.finished.connect()
- 
-    # def Imageupd_slotpre(self, Image):
-    #     self.label_18.setPixmap(QPixmap.fromImage(Image))               
 
-    # def Imageupd_slot(self, Image):
-    #     self.label_26.setPixmap(QPixmap.fromImage(Image))
 
-    def cancel(self):
-        self.label_26.clear()
-        #self.cap.release()
 
     def salir(self):
         sys.exit()
@@ -308,30 +296,48 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
       
     
     def fileopen(self,type):
-        global fname
+        global fname, red 
         if type =="Video":
             color=1
             cont=1
             brillo=1
             fname,b = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)")
+            self.lineEdit.setEnabled(True)
             self.frame_3.setDisabled(True)
             self.start_video(a=2) 
+            global tiemporeal
+            tiemporeal=False
 
         elif type =="Imagenes":
             fname,b = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)")
             self.frame_3.setEnabled(True)
+            self.lineEdit.setDisabled(True)
             self.label_18.setPixmap(QPixmap(fname))
 
         elif type == "red":
             pathname,b = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
             Ejecucion.Cargaparametros(self,pathmodel=pathname)
-            global red
             red = pathname
             self.label_28.setText(pathname)
 
-        elif type =="Tiempo real":
-            print("proximamente")
-            fname=""
+        elif type =="Video en Tiempo real":
+            #fname=self.geturl()
+            self.url_dialog.exec_()
+            color=1
+            cont=1
+            brillo=1
+           # print("url recivido en type para fname", fname)
+            self.lineEdit.setEnabled(True)
+            self.frame_3.setDisabled(True)
+            
+            tiemporeal=True
+            self.start_video(a=2)
+            
+            
+            
+            
+            
+
         
        
     
@@ -346,13 +352,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def configactual(self,data):
         self.textEdit.setPlainText(data)
-        
-    # def modyfiimage(self):
-    #     global brillo,cont,color
-    #     brillo = self.horizontalSlider_4.value()
-    #     cont = self.horizontalSlider_5.value()
-    #     color = self.horizontalSlider_6.value()
-    #     self.label_18.setPixmap(QPixmap(self.convertimage(fname,brillo,cont,color)))
+
     
     def brillo(self):
 
@@ -394,35 +394,28 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def modo(self):
         global modo
         combobox = self.sender()
+        
         if combobox.currentText() == "Video":
             modo = "Video"
             type = modo
             self.fileopen(type)          
             self.radioButton_3.setChecked(True)
+            
         if combobox.currentText() == "Imagenes":
             modo = "Imagenes"
             type = modo
             self.fileopen(type) 
             self.radioButton_3.setChecked(True)
+            
         if combobox.currentText() == "Video en Tiempo real":
-            modo = "Tiempo real"
+            modo = "Video en Tiempo real"
             type = modo
             self.fileopen(type) 
             self.radioButton_2.setChecked(True)
         return modo
 
-    # def red(self):
-    #     global red
-    #     combobox = self.sender()
-    #     if combobox.currentText() == "SSD Movilnet 2.0 fpnlite":
-    #         red = "SSD Movilnet 2.0 fpnlite"
-    #     if combobox.currentText() == "Red2":
-    #         red = "Red2"
-    #     if combobox.currentText() == "Red3":
-    #         red = "Red3"
-
     def enviar(self):
-            if modo=="Video":
+            if modo=="Video" or modo =="Video en Tiempo real":
                 self.enviarvideo()
             else:
                 try:
@@ -430,8 +423,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     red
                     brillo
                     cont
-                    color
-                    skipfps 
+                    color 
                     treshold
                 except NameError: 
                     self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
@@ -440,7 +432,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                     url = 'http://127.0.0.1:8000/configuracion/'
                     pyload = {'brillo': brillo, 'contraste': cont,
-                            'color': color, 'modo': modo, 'redneuronal': red , 'skipfps': skipfps, 'treshold':treshold}
+                            'color': color, 'modo': modo, 'redneuronal': red , 'skipfps': 0, 'treshold':treshold}
                     data=json.dumps(pyload)
                     data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
                     response = requests.post(url, data)
@@ -451,7 +443,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     
     def enviarvideo(self):
         
-            if modo== "Video":
+            if modo== "Video" or modo=="Video en Tiempo real":
                 color=1
                 cont=1
                 brillo=1
@@ -482,17 +474,55 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
      
 
     def showdialog(self):
-        dialog = QDialog(self)
+        dialog = ErrorDialog(self)
         dialog.show()
+    
+    def on_url_entered(self,url):
+        
+        print(f"URL ingresada: {url}")
+        global fname
+        fname = url
+        
+        
+ 
 
-
-class QDialog(QDialog):
+class ErrorDialog(QDialog):
     def __init__(self, *args, **kwargs):
         super(QDialog, self).__init__(*args, **kwargs)
         self.setWindowTitle("!!ERROR!!")
-        self.setFixedSize(200, 100)
-
-
+        label = QLabel("Modo de configuracion no establecido correctamente", self)
+        button = QPushButton('Aceptar', self)
+        button.clicked.connect(self.accept)
+        
+        layout = QVBoxLayout(self)
+        layout.addWidget(label)
+        layout.addWidget(button)
+        self.setFixedSize(400, 100)
+        
+class URLDialog(QDialog):
+    urlEntered = pyqtSignal(str)
+    def __init__(self, parent=None):
+        super(URLDialog, self).__init__(parent)
+        # Crear un QLineEdit para que el usuario ingrese la URL
+        self.url_edit = QLineEdit()
+        layout = QVBoxLayout()
+        layout.addWidget(QLabel("Ingrese la URL del video:"))
+        layout.addWidget(self.url_edit)
+        
+        # Crear un botón para aceptar la URL
+        button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        button_box.accepted.connect(self.accept)
+        button_box.rejected.connect(self.reject)
+        
+        layout.addWidget(button_box)
+        self.setLayout(layout)
+        
+    def accept(self):
+        # Emitir la señal urlEntered con el valor de la URL ingresada
+        url = self.url_edit.text()
+        self.urlEntered.emit(url)
+        
+        super().accept()
 
 if __name__ == "__main__":
     gui = QtWidgets.QApplication([])
