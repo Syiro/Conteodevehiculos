@@ -21,47 +21,64 @@ from datetime import date
 from datetime import datetime
 from untitled import *
 from config import *
-from imutils.video import VideoStream
+import pafy
+from urllib.parse import urlparse
 
 
 class VideoAnalyzer(QThread):
     videoEntered = pyqtSignal(np.ndarray)
     coutEntered = pyqtSignal(int)
     
-    def __init__(self, video_path):
+    def __init__(self, video_path,skipfps,treshold):
         super(VideoAnalyzer, self).__init__()
         self.video_path = video_path
+        self.skipfps = skipfps
+        self.treshold = treshold
     
     def Cargaparametros(self):
         local_zip = "fine_tuned_model.zip"  # sacar a la interfaz
         zip_ref = zipfile.ZipFile(local_zip, "r")
         zip_ref.extractall("fine_tuned_model")
         zip_ref.close()
-        global PATH_TO_SAVE_MODEL
         PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
-        
+        return PATH_TO_SAVE_MODEL
+        PATH_TO_SAVE_MODEL = 'fine_tuned_model/content/fine_tuned_model/saved_model'
+    
     def run(self):
+        
         fps = FPS().start()
-        
-        
+        fps2 = FPS().start()
         PATH_VIDEO = self.video_path
+        parsed = urlparse(PATH_VIDEO)
 
+        if parsed.scheme == "http" or parsed.scheme == "https":
+             video = pafy.new(PATH_VIDEO)
+             best = video.getbest(preftype='mp4')
+             vs = cv2.VideoCapture(best.url)
+        else:
+             vs = cv2.VideoCapture(PATH_VIDEO)
+              
         #PATH_OUTPUT = "videocondetecciones.mp4"  # sacar a la interfaz
 
-        SKIP_FPS = 30  # sacar a la interfaz
+       
 
-        TRESHOLD = 0.55 # sacar a la interfaz
+        TRESHOLD = float(self.treshold) # sacar a la interfaz
 
-        vs = cv2.VideoCapture(PATH_VIDEO)
+        
 
         #writer = None
 
         W = int(vs.get(cv2.CAP_PROP_FRAME_WIDTH))
         H = int(vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
+        fpsreal = int(vs.get(cv2.CAP_PROP_FPS))
         ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
 
+
+        fpsskip = int(self.skipfps)
+        SKIP_FPS =int(self.skipfps) # sacar a la interfaz
+
+        
         trackers = []
         trackableObjects = {}
 
@@ -74,10 +91,11 @@ class VideoAnalyzer(QThread):
 
         POINT = [0, int((H*(9/10))-H*0.1), W, int(H*0.1)]
 
-        
+        PATH_TO_SAVE_MODEL = 'fine_tuned_model/content/fine_tuned_model/saved_model'
 
         #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         #writer = cv2.VideoWriter(PATH_OUTPUT, fourcc, 20.0, (W, H), True)
+        
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
         
         
@@ -118,8 +136,9 @@ class VideoAnalyzer(QThread):
                     tracker = dlib.correlation_tracker()
                     rect = dlib.rectangle(startX, startY, endX, endY)
                     tracker.start_track(frame, rect)
-
+                    
                     trackers.append(tracker)
+                    
             else:
                 for tracker in trackers:
                     status = "Tracking"
@@ -182,20 +201,26 @@ class VideoAnalyzer(QThread):
             
             totalFrame += 1
             
+            if totalFrame == 1 :
+                fps.update()
+                fps.stop()
+            
             #print(totaldeteccions)
             self.videoEntered.emit(frame)
             self.coutEntered.emit(totalUP)
             
             #print(totalFrame)
-            if totalFrame == 1:
-                fps.update()
-                fps.stop()
+
+        vs.release()
+        fps2.stop()
                 
 
-             
-        print("Tiempo completo {}".format(fps.elapsed()))
+            
+        print("Tiempo en empezar a procesar es : {}".format(fps.elapsed()))
         print("Tiempo por frame {}".format(fps.fps()))
-        vs.release()
+        print("Tiempo total de procesado es:{}".format(fps2.elapsed()))
+        
+        
         
         count = totalUP
         url = 'http://127.0.0.1:8000/datossemaforo/'

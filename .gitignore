@@ -6,6 +6,7 @@
 #ignore ven
 .venv/*	
 .env/*
+env/*
 content/*
 db/*
 fine_tuned_model/*

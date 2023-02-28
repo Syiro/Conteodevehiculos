@@ -19,11 +19,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
 import numpy as np
-from imutils.video import FPS
+
 
 #export QT_QPA_PLATFORM=xcb
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 os.environ["QT_QPA_PLATFORM"] = "xcb"
+
 #os.environ["PAFY_BACKEND"] = "internal"
 #to open designer on venv qt5-tools designer
 #video test https://www.youtube.com/watch?v=APpB5Agw8d4&ab_channel=PrakharSachan
@@ -32,22 +33,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs) 
-        #objetos:
         
-        #conectar con el url Dialog
-        self.url_dialog = URLDialog(self) # instancia de la clase URLDialog
-        # Conectar la señal urlEntered de URLDialog al método on_url_entered de MainWindow
+        self.url_dialog = URLDialog()
         self.url_dialog.urlEntered.connect(self.on_url_entered)
-        
-        #conectar con hilo de deteccion 
-        self.videodetec = VideoAnalyzer(video_path="")
-        self.videodetec.videoEntered.connect(self.on_video_entered)
-        
-        
-        self.thread = VideoThread(fname="",tiemporeal=False)
         
         
         self.setupUi(self)
+        
         # comobo BOx implement
         self.comboBox.activated.connect(self.modo)
        # self.comboBox_4.activated.connect(self.red
@@ -138,7 +130,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         qt_img = self.convert_cv_qt(cv_img)
         if b != 1: #condicion videos cargados para vizualizar en config
             self.label_18.setPixmap(qt_img)
-            
         else  : #condicion videos cargados para ejecucion
             self.label_26.setPixmap(qt_img) 
             
@@ -176,15 +167,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         elif modo == "Video":
             print("ejecutando")
             skipfps , treshold = self.guardar()
-            self.videodetec = VideoAnalyzer(video_path=fname)
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
-                
+             
         elif modo == "Video en Tiempo real":
             skipfps , treshold = self.guardar()
-            Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
-            self.start_video(a=1,videofile=fname)
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
+            self.videodetec.start()
+            self.videodetec.videoEntered.connect(self.on_video_entered)
+            self.videodetec.coutEntered.connect(self.on_count_entered)
+
         
         self.Ejecucion_mode(modo=modo,red=red) 
          
@@ -192,24 +186,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         global b
         fname=videofile
         if a == 1: #previsualizacion videos descargados 
-             tiemporeal = True
-             self.thread = VideoThread(tiemporeal=tiemporeal,fname=fname)
+             self.thread = VideoThread(tiemporeal=True,fname=fname)
              self.thread.start()
              self.thread.change_pixmap_signal.connect(self.update_image)
              
         elif a==2: #previsualizacion videos cargados de archivo
-            tiemporeal = False
-            self.thread = VideoThread(tiemporeal=tiemporeal,fname=fname)
-            self.thread.start()
-            self.thread.change_pixmap_signal.connect(self.update_image)
-            
-        elif a==3: #reproducir video en ejecucion
-            print("reproduciendo video")
-            global b
-            b=1
             self.thread = VideoThread(tiemporeal=False,fname=fname)
             self.thread.start()
             self.thread.change_pixmap_signal.connect(self.update_image)
+            
             
     def salir(self):
         sys.exit()
@@ -296,11 +281,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif type == "red":
             pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
-            self.videodetec.Cargaparametros()
+            # self.videodetec.Cargaparametros()
             red = pathname
             self.label_28.setText(pathname)
 
         elif type =="Video en Tiempo real":
+            b = 0
             color=1
             cont=1
             brillo=1

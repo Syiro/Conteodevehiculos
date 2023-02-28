@@ -7,6 +7,8 @@ import cv2
 import zipfile
 from ejecucion import*
 from untitled import *
+
+
 class VideoThread(QThread):
     
     change_pixmap_signal = pyqtSignal(np.ndarray)
@@ -21,16 +23,6 @@ class VideoThread(QThread):
     def stop(self):
         self.__run_flag= False
         self.wait()
-    
-    def Cargaparametros(self):
-        
-        local_zip = "fine_tuned_model.zip"  # sacar a la interfaz
-        zip_ref = zipfile.ZipFile(local_zip, "r")
-        zip_ref.extractall("fine_tuned_model")
-        zip_ref.close()
-        global PATH_TO_SAVE_MODEL
-        PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
-        PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
 
     def run(self):
         
@@ -40,18 +32,25 @@ class VideoThread(QThread):
             best = video.getbest(preftype='mp4')
             cap = cv2.VideoCapture(best.url)
             
-            while self.__run_flag:
-                 ret, cv_img = cap.read()
-                 if ret:
+            while True:
+                ret, cv_img = cap.read()
+                if cv_img is None :
+                     break  
                     #hilo de analizis de video guardado
-                    self.change_pixmap_signal.emit(cv_img)
+                self.change_pixmap_signal.emit(cv_img)
             cap.release()
             
         else:  #archivo de video
             cap = cv2.VideoCapture(self.fname)
-            while self.__run_flag:
+            
+            while True:
                 ret, cv_img = cap.read()
-                if ret:
-                    #hilo de analizis de 
-                    self.change_pixmap_signal.emit(cv_img)
-            cap.release()        
+                
+                if cv_img is None:
+                    break
+                
+                self.change_pixmap_signal.emit(cv_img)
+
+            cap.release() 
+             
+         
