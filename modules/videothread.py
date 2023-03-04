@@ -35,15 +35,16 @@ class VideoAnalyzer(QThread):
         self.skipfps = skipfps
         self.treshold = treshold
     
-    def Cargaparametros(self):
-        local_zip = "fine_tuned_model.zip"  # sacar a la interfaz
+    def Cargaparametros(self,red):
+        local_zip = red # sacar a la interfaz
         zip_ref = zipfile.ZipFile(local_zip, "r")
         zip_ref.extractall("fine_tuned_model")
         zip_ref.close()
+        global PATH_TO_SAVE_MODEL
         PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
-        return PATH_TO_SAVE_MODEL
-        PATH_TO_SAVE_MODEL = 'fine_tuned_model/content/fine_tuned_model/saved_model'
+        
+    
     
     def run(self):
         
@@ -91,7 +92,7 @@ class VideoAnalyzer(QThread):
 
         POINT = [0, int((H*(9/10))-H*0.1), W, int(H*0.1)]
 
-        PATH_TO_SAVE_MODEL = 'fine_tuned_model/content/fine_tuned_model/saved_model'
+       
 
         #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         #writer = cv2.VideoWriter(PATH_OUTPUT, fourcc, 20.0, (W, H), True)
@@ -200,9 +201,9 @@ class VideoAnalyzer(QThread):
 
             
             totalFrame += 1
-            
+            fps2.update()
             if totalFrame == 1 :
-                fps.update()
+                
                 fps.stop()
             
             #print(totaldeteccions)
@@ -217,7 +218,7 @@ class VideoAnalyzer(QThread):
 
             
         print("Tiempo en empezar a procesar es : {}".format(fps.elapsed()))
-        print("Tiempo por frame {}".format(fps.fps()))
+        print("Tiempo por frame {}".format(fps2.fps()))
         print("Tiempo total de procesado es:{}".format(fps2.elapsed()))
         
         

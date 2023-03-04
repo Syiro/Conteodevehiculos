@@ -8,6 +8,7 @@ from enviar import*
 from configcolor import*
 from ejecucion import *
 from dialogos import*
+from imagethread import*
 from videoplayer import*
 from videothread import *
 import pafy
@@ -19,6 +20,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import cv2
 import numpy as np
+from PIL import Image
 
 
 #export QT_QPA_PLATFORM=xcb
@@ -74,7 +76,16 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_count_entered(self,totalUp):
         count = totalUp
         self.label_25.setText(str(count))
-        
+    
+    @pyqtSlot(np.ndarray)
+    def on_image_entered(self,img):
+        pic = QPixmap.fromImage(QImage(img.data, img.shape[1], img.shape[0], QImage.Format_RGB888))
+        self.label_26.setPixmap(pic) 
+    
+    @pyqtSlot(int)
+    def on_count_imgentered(self,count):
+        counter = count     
+        self.label_25.setText(str(counter))
           
     def send(self):
         try:
@@ -154,18 +165,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def abrirred(self):
         self.fileopen(type="red")
+        
+    def Mostrar_img(self, fname, brillo, color, cont):
+            self.label_26.setPixmap(
+                QPixmap(self.configuracionbrillo(fname, brillo)))
+            self.label_26.setPixmap(QPixmap(self.configuracioncolor(fname, color)))
+            self.label_26.setPixmap(
+                QPixmap(self.configuracioncontraste(fname, cont))) 
 
     def modoejecucion(self):
         
         if modo == "Imagenes":
             skipfps , tresholdp = self.guardar()
-            Ejecucion.Ejecucion_mode(self=self,modo=modo,red=red)
-            Ejecucion.Mostrar_img(self=self,fname=fname,brillo=brillo,color=color,cont=cont)
-            Ejecucion.Cargaparametros(self=self,pathmodel=red)
-            Ejecucion.Inferencia(self=self,img=fname, treshold=tresholdp)
+            #self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
+            self.fotodetec = ImageAnalizer(photo_path="original-image.png",treshold=tresholdp)
+            self.fotodetec.start()
+            self.fotodetec.ImgEntered.connect(self.on_image_entered)
+            self.fotodetec.CountImgEntered.connect(self.on_count_imgentered)
             
         elif modo == "Video":
-            print("ejecutando")
             skipfps , treshold = self.guardar()
             self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
             self.videodetec.start()
@@ -281,8 +299,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         elif type == "red":
             pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
-            # self.videodetec.Cargaparametros()
+            self.thread = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
+            self.fotodetec = ImageAnalizer(photo_path=fname,treshold=treshold)
             red = pathname
+            self.thread.Cargaparametros(red=red)
+            self.fotodetec.Cargaparametros(red=red)
             self.label_28.setText(pathname)
 
         elif type =="Video en Tiempo real":
