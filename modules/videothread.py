@@ -218,7 +218,7 @@ class VideoAnalyzer(QThread):
 
             
         print("Tiempo en empezar a procesar es : {}".format(fps.elapsed()))
-        print("Tiempo por frame {}".format(fps2.fps()))
+        print("Frames por segundo {}".format(fps2.fps()))
         print("Tiempo total de procesado es:{}".format(fps2.elapsed()))
         
         

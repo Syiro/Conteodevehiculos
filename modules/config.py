@@ -122,12 +122,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         treshold=0.3
         pathname = "fine_tuned_model.zip"
         red = pathname
-        self.lineEdit.setText(skipfps)
-        self.lineEdit_2.setText(treshold)
+        self.lineEdit.setText(str(skipfps))
+        self.lineEdit_2.setText(str(treshold))
         self.horizontalSlider_4.setValue(brillo)
         self.horizontalSlider_5.setValue(cont)
         self.horizontalSlider_6.setValue(color)
-        Ejecucion.Cargaparametros(self,pathmodel=pathname)
+        self.videodetec = VideoAnalyzer(video_path="",skipfps="",treshold="")
+        self.fotodetec = ImageAnalizer(photo_path="",treshold="")
+        self.fotodetec.Cargaparametros(red=pathname)
+        self.videodetec.Cargaparametros(red=pathname)
         self.label_28.setText(pathname)
         if modo == "Imagenes" :
             self.send()
