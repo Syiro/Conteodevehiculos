@@ -6,7 +6,6 @@ import requests
 import uvicorn
 from enviar import*
 from configcolor import*
-from ejecucion import *
 from dialogos import*
 from imagethread import*
 from videoplayer import*
@@ -65,11 +64,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.guardar)
         self.pushButton_6.clicked.connect(self.auto)
        # self.pushButton_7.clicked.connect(self.reseteo)
+        progress_bar = QProgressBar()
+        progress_bar.setValue(0)
        
     @pyqtSlot(np.ndarray)  
     def on_video_entered(self,frame):
         qt_img = self.convert_cv_qt(frame)
         self.label_26.setPixmap(qt_img)
+        self.progressBar.setValue(100)
 
         
     @pyqtSlot(int) 
@@ -81,6 +83,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_image_entered(self,img):
         pic = QPixmap.fromImage(QImage(img.data, img.shape[1], img.shape[0], QImage.Format_RGB888))
         self.label_26.setPixmap(pic) 
+        self.progressBar.setValue(100)
     
     @pyqtSlot(int)
     def on_count_imgentered(self,count):
@@ -177,7 +180,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 QPixmap(self.configuracioncontraste(fname, cont))) 
 
     def modoejecucion(self):
-        
+        self.progressBar.setValue(25)
         if modo == "Imagenes":
             skipfps , tresholdp = self.guardar()
             #self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
@@ -186,12 +189,17 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.fotodetec.ImgEntered.connect(self.on_image_entered)
             self.fotodetec.CountImgEntered.connect(self.on_count_imgentered)
             
+            
+            
+            
         elif modo == "Video":
             skipfps , treshold = self.guardar()
             self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
+            
+            
              
         elif modo == "Video en Tiempo real":
             skipfps , treshold = self.guardar()
@@ -199,6 +207,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
+            
+            
 
         
         self.Ejecucion_mode(modo=modo,red=red) 
@@ -283,41 +293,69 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         return pathout
         
     def fileopen(self,type):
+        
         global red, fname,color,cont,brillo,b
         if type =="Video":
-            color=1
-            cont=1
-            brillo=1
-            fname,bo = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)")
-            self.lineEdit.setEnabled(True)
-            self.frame_3.setDisabled(True)
-            self.start_video(a=2,videofile=fname)
-            b=0 
+            try:
+                color=1
+                cont=1
+                brillo=1
+                fname,bo = QFileDialog.getOpenFileName(self,"Open File",""," Videos (*.mp4 *.wav)")
+                self.lineEdit.setEnabled(True)
+                self.frame_3.setDisabled(True)
+                self.start_video(a=2,videofile=fname)
+                b=0 
+                
+            except Exception as e:
+                self.textEdit.setPlainText(str(e))
+                self.showdialog()
+                
 
         elif type =="Imagenes":
-            fname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)")
-            self.frame_3.setEnabled(True)
-            self.lineEdit.setDisabled(True)
-            self.label_18.setPixmap(QPixmap(fname))
-
+            
+            try:
+                fname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Imagenes (*.jpg *.jpeg *.png)")
+                self.frame_3.setEnabled(True)
+                self.lineEdit.setDisabled(True)
+                self.label_18.setPixmap(QPixmap(fname))
+                
+            except Exception as e:
+                self.textEdit.setPlainText(str(e))
+                self.showdialog() 
+                
         elif type == "red":
-            pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
-            self.thread = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
-            self.fotodetec = ImageAnalizer(photo_path=fname,treshold=treshold)
-            red = pathname
-            self.thread.Cargaparametros(red=red)
-            self.fotodetec.Cargaparametros(red=red)
-            self.label_28.setText(pathname)
+            
+            try: 
+                pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
+                self.thread = VideoAnalyzer(video_path="",skipfps="",treshold="")
+                self.fotodetec = ImageAnalizer(photo_path="",treshold="")
+                red = pathname
+                self.thread.Cargaparametros(red=red)
+                self.fotodetec.Cargaparametros(red=red)
+                self.label_28.setText(pathname)
+                
+            except Exception as e: 
+                self.textEdit.setPlainText(str(e))
+                self.showdialog()
+
+                
 
         elif type =="Video en Tiempo real":
-            b = 0
-            color=1
-            cont=1
-            brillo=1
-            self.url_dialog.exec_()
-            self.lineEdit.setEnabled(True)
-            self.frame_3.setDisabled(True)
-            self.start_video(a=1,videofile=fname)
+            
+            try:
+                b = 0
+                color=1
+                cont=1
+                brillo=1
+                self.url_dialog.exec()
+                self.lineEdit.setEnabled(True)
+                self.frame_3.setDisabled(True)
+                self.start_video(a=1,videofile=fname)
+            except Exception as e:
+                self.textEdit.setPlainText(str(e))
+                self.showdialog()
+                
+            
         
     def Ejecucion_mode(self, modo, red):
         self.label_24.setText(red)
@@ -373,6 +411,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def modo(self):
         global modo
+        self.progressBar.setValue(0)
+        self.label_26.clear()
         combobox = self.sender()
         
         if combobox.currentText() == "Video":
@@ -387,7 +427,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.fileopen(type) 
             self.radioButton_3.setChecked(True)
             
-        if combobox.currentText() == "Video en Tiempo real":
+        if combobox.currentText() == "Video en linea":
             modo = "Video en Tiempo real"
             type = modo
             self.fileopen(type) 

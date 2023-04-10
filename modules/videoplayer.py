@@ -5,7 +5,6 @@ import numpy as np
 import pafy
 import cv2
 import zipfile
-from ejecucion import*
 from untitled import *
 
 

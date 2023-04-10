@@ -47,7 +47,6 @@ class VideoAnalyzer(QThread):
     
     
     def run(self):
-        
         fps = FPS().start()
         fps2 = FPS().start()
         PATH_VIDEO = self.video_path
@@ -59,47 +58,21 @@ class VideoAnalyzer(QThread):
              vs = cv2.VideoCapture(best.url)
         else:
              vs = cv2.VideoCapture(PATH_VIDEO)
-              
-        #PATH_OUTPUT = "videocondetecciones.mp4"  # sacar a la interfaz
-
-       
-
-        TRESHOLD = float(self.treshold) # sacar a la interfaz
-
-        
-
-        #writer = None
-
+             
+        category_index = label_map_util.create_category_index_from_labelmap("label_map.pbtxt", use_display_name=True)
+        TRESHOLD = float(self.treshold) # sacar a la interfa
         W = int(vs.get(cv2.CAP_PROP_FRAME_WIDTH))
         H = int(vs.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        fpsreal = int(vs.get(cv2.CAP_PROP_FPS))
         ct = CentroidTracker(maxDisappeared=40, maxDistance=50)
-
-
-        fpsskip = int(self.skipfps)
         SKIP_FPS =int(self.skipfps) # sacar a la interfaz
-
-        
         trackers = []
         trackableObjects = {}
-
+        rects = []
         totalFrame = 0
         totaldeteccions = 0
-        totalDown = 0
         totalUP = 0
-
-        DIRECTION_PEOPLE = True
-
-        POINT = [0, int((H*(9/10))-H*0.1), W, int(H*0.1)]
-
-       
-
-        #fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        #writer = cv2.VideoWriter(PATH_OUTPUT, fourcc, 20.0, (W, H), True)
-        
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
-        
-        
+        countedObjects = {}
         while True:
             
             ret, frame = vs.read()
@@ -154,37 +127,39 @@ class VideoAnalyzer(QThread):
 
                     rects.append((startX, startY, endX, endY))
                     
-            cv2.rectangle(frame, (POINT[0], POINT[1]), (POINT[0] +
-                          POINT[2], POINT[1] + POINT[3]), (255, 0, 255), 2)
 
             objects = ct.update(rects)
-
+            
             for (objectID, centroid) in objects.items():
+                
+                MIN_SPEED = 1 
                 to = trackableObjects.get(objectID, None)
                 if to is None:
                     to = TrackableObject(objectID, centroid)
 
                 else:
                     y = [c[1] for c in to.centroids]
-                    direcction = centroid[1] - np.mean(y)
-                    to.centroids.append(centroid)
+                    direction = centroid[1] - np.mean(y)
+                    to.centroids.append(centroid) 
                     if not to.counted:
-                        if centroid[0] > POINT[0] and centroid[0] < (POINT[0] + POINT[2]) and centroid[1] > POINT[1] and centroid[1] < (POINT[1]+POINT[3]):
-                            if DIRECTION_PEOPLE:
-                                if direcction > 0 :
-                                    totalUP += 1
-                                    to.counted = True
-                            else:
-                                if direcction < 0:
-                                    totalUP += 1
-                                    to.counted = True
+                        speed = np.linalg.norm(np.array(centroid) - np.array(to.centroids[-1]))
+                        if direction < 0 and speed < MIN_SPEED:
+                            if objectID not in countedObjects:
+                                totalUP += 1
+                                countedObjects[objectID] = True
+                            to.counted = True
+                                                        
                 trackableObjects[objectID] = to
-
-                text = "ID {}".format(objectID)
-                cv2.putText(frame, text, (centroid[0]-10, centroid[1]-10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                cv2.circle(
-                    frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
+                #text = "{}: {:.2f}%".format(category_index[idx]['name'], detection_scores[objectID]*100)
+                text = "{}: {:.1f}px/f, {:.2f}%".format(category_index[idx]['name'], np.linalg.norm(np.array([startX, startY]) - np.array([endX, endY])), detection_scores[objectID]*100)
+                if objectID < len(rects):
+                    (startX, startY, endX, endY) = rects[objectID]
+                cv2.putText(frame, text, (startX, startY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0 ,255, 0), 2)
+                if category_index[idx]['name'] == 'vehicle':
+                        color = (0, 255, 0)  # verde para "vehicle"
+                else:
+                    color = (255, 0, 0)  # azul para "novehicle"
+                cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
 
             info = [
                 ("Carros detectados", totalUP),
