@@ -60,7 +60,6 @@ class municipiosUpdate(BaseModel):
         orm_mode=True
 
 class usuarios(BaseModel):
-    idusuarios:Optional[int]
     nombre : str
     telefono : str
     mail : str

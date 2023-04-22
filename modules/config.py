@@ -5,6 +5,7 @@ import os
 import requests
 import uvicorn
 from enviar import*
+from report import*
 from configcolor import*
 from dialogos import*
 from imagethread import*
@@ -63,9 +64,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         #guardar button implement
         self.pushButton_2.clicked.connect(self.guardar)
         self.pushButton_6.clicked.connect(self.auto)
-       # self.pushButton_7.clicked.connect(self.reseteo)
+        #calendar implement
+        self.calendarWidget.clicked.connect(self.fechaini)
+        #genreport implement
+        self.pushButton_5.clicked.connect(self.genreport)
+        #registrar info
+        self.pushButton_7.clicked.connect(self.reguser)
+       
+       
+       
         progress_bar = QProgressBar()
         progress_bar.setValue(0)
+        
        
     @pyqtSlot(np.ndarray)  
     def on_video_entered(self,frame):
@@ -442,8 +452,41 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         global fname
         print(f"URL ingresada: {url}")
         fname = url 
-        
+     
+    def genreport(self):
 
+        self.horainicial = self.timeEdit.time()
+        self.horafinal = self.timeEdit_2.time()
+        Reporte.hora(self=self,horainit=self.horainicial.toString("hh:mm AP"),horafin=self.horafinal.toString("hh:mm AP"))
+        Reporte.reporte(self=self)
+ 
+    
+    def reguser(self):
+        nombre = self.lineEdit_3.text()
+        email = self.lineEdit_4.text()
+        telefono = self.lineEdit_5.text()
+        departamento  = self.lineEdit_7.text()
+        municipio = self.lineEdit_8.text()
+        Reporte.insertuser(self=self,nombre=nombre,email=email,telefono=telefono)
+        Reporte.insertdepa(self=self,departamentos=departamento)
+        Reporte.insertcity(self=self,municipio=municipio)
+    
+    def fechaini(self):
+        fechainit = self.calendarWidget.selectedDate()
+        # establecer fecha mínima en el segundo calendario
+        
+        self.calendarWidget_2.setMinimumDate(fechainit)
+        self.calendarWidget_2.setSelectedDate(fechainit)
+        # guardar fecha seleccionada en la variable de fecha inicial
+        self.fecha_inicial = fechainit.toString("yyyy-MM-dd")
+        self.calendarWidget_2.clicked.connect(self.fechafin)
+        
+    def fechafin(self):
+        fechafin = self.calendarWidget_2.selectedDate()
+        # guardar fecha seleccionada en la variable de fecha final
+        self.fecha_final = fechafin.toString("yyyy-MM-dd")
+        Reporte.fecha(self=self,fechainit=self.fecha_inicial,fechafin=self.fecha_final)
+        
 
 if __name__ == "__main__":
     gui = QtWidgets.QApplication([])

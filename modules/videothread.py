@@ -23,7 +23,7 @@ from untitled import *
 from config import *
 import pafy
 from urllib.parse import urlparse
-
+import mysql.connector
 
 class VideoAnalyzer(QThread):
     videoEntered = pyqtSignal(np.ndarray)
@@ -197,18 +197,36 @@ class VideoAnalyzer(QThread):
         print("Tiempo total de procesado es:{}".format(fps2.elapsed()))
         
         
-        
+        ultimousuario = self.ultimousuario()
+        ultimousuario=int(ultimousuario)
         count = totalUP
         url = 'http://127.0.0.1:8000/datossemaforo/'
-        pyload = {'fecha':str(datetime.now()),'carrosdetectados':count}
+        pyload = {'idcarros':ultimousuario,'fecha':str(datetime.now()),'carrosdetectados':count}
         data=json.dumps(pyload) 
         response = requests.post(url, data)   
         
         if response.status_code == 200:
-            print(response.content)   
-        
-       
-    
-        #writer.release()
+            print(response.content) 
+            
+    def ultimousuario(self):
+            # Conexión a la base de datos
+        mydb = mysql.connector.connect(
+        host="127.0.0.1",
+        user="root",
+        password="Syiro2101.",
+        database="mydb"
+        )
 
+    # Crear cursor
+        cursor = mydb.cursor()
+
+        # Ejecutar la consulta
+        cursor.execute("SELECT idusuarios FROM usuarios ORDER BY idusuarios DESC LIMIT 1;")
+        result = cursor.fetchone()
+        return result[0]
         
+    
+
+    #writer.release()
+
+    

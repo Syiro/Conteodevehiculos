@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String , Float, ForeignKey
+from sqlalchemy import Column, Integer, String , Float, ForeignKey, Date
 from app.Conexion import Base
 
 class configuracion(Base):
@@ -20,6 +20,7 @@ class datossemaforo(Base):
     idusuarios = Column(Integer, ForeignKey("usuarios.idusuarios"))
     fecha = Column(String(45))
     carrosdetectados = Column(Integer)
+    
 
 class departamentos(Base):
     __tablename__='departamentos'
