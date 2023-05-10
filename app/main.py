@@ -65,7 +65,7 @@ def show_config(db:Session=Depends(get_db)):
 @app.post('/configuracion/',response_model=schemas.configuracion)
 def create_config(entrada:schemas.configuracion,db:Session=Depends(get_db)):
     configuracion = models.configuracion(brillo = entrada.brillo, contraste = entrada.contraste, color = entrada.color, 
-                                         modo= entrada.modo, redneuronal=entrada.redneuronal , skipfps=entrada.skipfps , treshold = entrada.treshold)
+                                         modo= entrada.modo, redneuronal=entrada.redneuronal , skipfps=entrada.skipfps , treshold = entrada.treshold, vmax=entrada.vmax)
     db.add(configuracion)
     db.commit()
     db.refresh(configuracion)

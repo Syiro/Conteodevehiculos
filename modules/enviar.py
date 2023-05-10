@@ -3,7 +3,7 @@ import requests
 import mysql.connector
 
 class Enviar:
-    def enviar(self,modo,red,brillo,cont,color,treshold,skipfps):
+    def enviar(self,modo,red,brillo,cont,color,treshold,skipfps,vmax):
             
             self.modo=modo
             self.red=red
@@ -12,6 +12,7 @@ class Enviar:
             self.color=color
             self.treshold=treshold
             self.skipfps=skipfps
+            self.vmax=vmax
                             # Conexión a la base de datos
             mydb = mysql.connector.connect(
                 host="127.0.0.1",
@@ -28,7 +29,7 @@ class Enviar:
             ultimoid=int(result[0])
             url = 'http://127.0.0.1:8000/configuracion/'
             pyload = {'idconfiguracion':ultimoid,'brillo':  self.brillo, 'contraste':  self.cont,
-                    'color':  self.color, 'modo':  self.modo, 'redneuronal':  self.red , 'skipfps': self.skipfps , 'treshold': self.treshold}
+                    'color':  self.color, 'modo':  self.modo, 'redneuronal':  self.red , 'skipfps': self.skipfps , 'treshold': self.treshold, 'vmax':self.vmax}
             data=json.dumps(pyload)
             data2=json.dumps(pyload,indent=6,sort_keys=True,separators =(". ", " = "))
             response = requests.post(url, data)

@@ -10,6 +10,7 @@ class configuracion(BaseModel):
     redneuronal:str
     skipfps:int
     treshold:float
+    vmax:int
     
     class Config:
         orm_mode = True

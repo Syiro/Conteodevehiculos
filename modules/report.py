@@ -6,9 +6,12 @@ from sqlalchemy import desc
 
 import pandas as pd
 import matplotlib.pyplot as plt
+from reportlab.lib.pagesizes import landscape, letter
+from reportlab.lib import colors
+from reportlab.lib.units import inch
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Spacer
 from reportlab.pdfgen import canvas
-
-
+import sqlite3
 class Reporte:
     
     def hora(self,horainit,horafin):
@@ -75,36 +78,51 @@ class Reporte:
             cursor.execute(query)
 
             # Obtener los resultados de la consulta utilizando el método fetchall()
-            results = cursor.fetchall()
+            resultados = cursor.fetchall()
 
-            # Crear un dataframe de Pandas con los resultados
-            columns = ['Nombre', 'Teléfono', 'Correo', 'Brillo', 'Contraste', 'Color', 'Red neuronal', 'Modo', 'Skip FPS', 'Treshold', 'Fecha', 'Autos contados', 'Municipio', 'Departamento']
-            df = pd.DataFrame(results, columns=columns)
+            # Definir el tamaño de la página en formato landscape
+            pagina = landscape(letter)
 
-            # Crear una tabla en el PDF utilizando Pandas
-            pdf = canvas.Canvas("reporte.pdf")
-            pdf.drawString(100, 750, "Reporte de registros de usuarios")
-            y = 700
-            for row in df.iterrows():
-                y -= 20
-                pdf.drawString(100, y, f"{row[1]['Nombre']}")
-                pdf.drawString(200, y, f"{row[1]['Teléfono']}")
-                pdf.drawString(300, y, f"{row[1]['Correo']}")
-                pdf.drawString(400, y, f"{row[1]['Autos contados']}")
-                pdf.drawString(500, y, f"{row[1]['Fecha']}")
-            pdf.drawString(100, y-40, "Tabla de usuarios")
+            # Crear el objeto Canvas para generar el reporte en PDF
+            pdf = canvas.Canvas("reporte.pdf", pagesize=pagina)
+
+            # Agregar el título al reporte
+            pdf.setFont("Helvetica-Bold", 16)
+            pdf.drawCentredString(415, 750, "Reporte de registros de usuarios")
+
+            # Crear la tabla con los datos de los usuarios
+            tabla = Table(resultados, colWidths=[1.5*inch, 1.5*inch, 1.5*inch, 0.8*inch, 1.5*inch, 0.8*inch, 0.8*inch, 0.8*inch, 0.8*inch, 0.8*inch, 1.5*inch, 1*inch, 1.5*inch, 1.5*inch])
+            tabla.setStyle(TableStyle([
+                ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#8FCACA')),
+                ('TEXTCOLOR', (0,0), (-1,0), colors.white),
+                ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+                ('FONTNAME', (0,0), (-1,0), 'Helvetica-Bold'),
+                ('FONTSIZE', (0,0), (-1,0), 12),
+                ('FONTSIZE', (0,1), (-1,-1), 10),
+                ('BOTTOMPADDING', (0,0), (-1,0), 12),
+                ('BOTTOMPADDING', (0,1), (-1,-1), 8),
+                ('BACKGROUND', (0,1), (-1,-1), colors.white),
+                ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ]))
+
+            # Agregar la tabla al reporte y cerrar el objeto Canvas
+            # Agregar la tabla al reporte
+            tabla.wrapOn(pdf, 800, 500)
+            tabla.drawOn(pdf, 40, 500)
+
+            # Agregar un espacio en blanco para separar la tabla del pie de página
+            espacio = Spacer(1, 20)
+            espacio.wrapOn(pdf, 800, 50)
+            espacio.drawOn(pdf, 0, 0)
+
+            # Agregar el pie de página al reporte
+            pdf.setFont("Helvetica", 10)
+            pdf.drawCentredString(415, 40, "Generado por: ReportLab")
+            pdf.drawCentredString(415, 30, "Fecha de generación: 02/05/2023")
+
+            # Cerrar el objeto Canvas y guardar el reporte en PDF
             pdf.save()
-
-            # Crear un gráfico de barras utilizando Matplotlib
-            fig, ax = plt.subplots(figsize=(8,6))
-            df['Municipio'].value_counts().plot(kind='bar', ax=ax)
-            ax.set_xlabel('Municipio')
-            ax.set_ylabel('Cantidad de usuarios')
-            ax.set_title('Distribución de usuarios por municipio')
-            plt.savefig('barras.png')
-            plt.close()
-
-            # Cerrar el cursor y la conexión a la base de datos
+           # Cerrar el cursor y la conexión a la base de datos
             cursor.close()
             cnx.close()
-                    # Cerrar el cursor y la conexión a la base de datos
+             #       Cerrar el cursor y la conexión a la base de datos

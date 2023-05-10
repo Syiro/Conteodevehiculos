@@ -13,6 +13,7 @@ class configuracion(Base):
     redneuronal = Column(String(45))
     skipfps = Column(Integer)
     treshold = Column(Float)
+    vmax = Column(Integer)
     
 class datossemaforo(Base):
     __tablename__='datossemaforo'

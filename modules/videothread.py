@@ -29,11 +29,12 @@ class VideoAnalyzer(QThread):
     videoEntered = pyqtSignal(np.ndarray)
     coutEntered = pyqtSignal(int)
     
-    def __init__(self, video_path,skipfps,treshold):
+    def __init__(self, video_path,skipfps,treshold,vmax):
         super(VideoAnalyzer, self).__init__()
         self.video_path = video_path
         self.skipfps = skipfps
         self.treshold = treshold
+        self.vmax = vmax
     
     def Cargaparametros(self,red):
         local_zip = red # sacar a la interfaz
@@ -132,7 +133,8 @@ class VideoAnalyzer(QThread):
             
             for (objectID, centroid) in objects.items():
                 
-                MIN_SPEED = 1 
+                MIN_SPEED = int(self.vmax)
+                print(MIN_SPEED)
                 to = trackableObjects.get(objectID, None)
                 if to is None:
                     to = TrackableObject(objectID, centroid)

@@ -35,13 +35,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def __init__(self, *args, **kwargs):
         QtWidgets.QMainWindow.__init__(self, *args, **kwargs) 
-        
         self.url_dialog = URLDialog()
         self.url_dialog.urlEntered.connect(self.on_url_entered)
-        
-        
         self.setupUi(self)
-        
         # comobo BOx implement
         self.comboBox.activated.connect(self.modo)
        # self.comboBox_4.activated.connect(self.red
@@ -70,8 +66,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_5.clicked.connect(self.genreport)
         #registrar info
         self.pushButton_7.clicked.connect(self.reguser)
-       
-       
+        self.label_35.setPixmap(QPixmap("/home/ruben-laptop/Tesis/code/icons/logounivalle.png"))
+        self.label_22.setPixmap(QPixmap("/home/ruben-laptop/Tesis/code/icons/psi.png"))
        
         progress_bar = QProgressBar()
         progress_bar.setValue(0)
@@ -108,6 +104,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             cont
             color 
             treshold
+            vmax
             
         except NameError: 
             self.textEdit.setPlainText("Modo de ejecucion no definido apropiadamente")
@@ -115,11 +112,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             
             if modo == "Video" or modo=="Video en Tiempo real":
-                Enviar.enviar(self=self,modo=modo, red=red, brillo = 1,
-                                cont=1, color=1, treshold=treshold, skipfps=skipfps)
+                Enviar.enviar(self=self,modo=modo, red=red, brillo = 1, cont=1, color=1, treshold=treshold, skipfps=skipfps, vmax=vmax)
             else:
                 Enviar.enviar(self=self,modo=modo, red=red, brillo = brillo,
-                                cont=cont, color=color, treshold=treshold, skipfps=0)
+                                cont=cont, color=color, treshold=treshold, skipfps=0,vmax=0)
 
             
     def handle_detection(self, detected):
@@ -174,10 +170,12 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         event.accept()
 
     def guardar(self):
-        global skipfps, treshold
+        global skipfps, treshold, vmax
         skipfps=str(self.lineEdit.text())
         treshold=str(self.lineEdit_2.text())
-        return skipfps , treshold
+        vmax=str(self.lineEdit_6.text())
+        self.textEdit.setPlainText("Carga de parametros Exitosa")
+        return skipfps , treshold, vmax
 
     def abrirred(self):
         self.fileopen(type="red")
@@ -192,7 +190,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def modoejecucion(self):
         self.progressBar.setValue(25)
         if modo == "Imagenes":
-            skipfps , tresholdp = self.guardar()
+            skipfps , tresholdp, vmax = self.guardar()
             #self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
             self.fotodetec = ImageAnalizer(photo_path="original-image.png",treshold=tresholdp)
             self.fotodetec.start()
@@ -203,8 +201,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             
         elif modo == "Video":
-            skipfps , treshold = self.guardar()
-            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
+            skipfps , treshold, vmax = self.guardar()
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,vmax=vmax)
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
@@ -212,8 +210,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
              
         elif modo == "Video en Tiempo real":
-            skipfps , treshold = self.guardar()
-            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold)
+            skipfps , treshold, vmax = self.guardar()
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,vmax=vmax)
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
@@ -304,7 +302,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def fileopen(self,type):
         
-        global red, fname,color,cont,brillo,b
+        global red, fname,color,cont,brillo,b,vmax
         if type =="Video":
             try:
                 color=1
@@ -337,7 +335,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             try: 
                 pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
-                self.thread = VideoAnalyzer(video_path="",skipfps="",treshold="")
+                self.thread = VideoAnalyzer(video_path="",skipfps="",treshold="",vmax="")
                 self.fotodetec = ImageAnalizer(photo_path="",treshold="")
                 red = pathname
                 self.thread.Cargaparametros(red=red)
@@ -384,7 +382,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def configactual(self,data):
         self.textEdit.setPlainText(data)
-
+        
+        
     def brillo(self):
 
         global brillo,cont,color
