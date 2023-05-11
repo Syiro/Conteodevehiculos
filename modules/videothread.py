@@ -74,6 +74,7 @@ class VideoAnalyzer(QThread):
         totalUP = 0
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
         countedObjects = {}
+        speed=0
         while True:
             
             ret, frame = vs.read()
@@ -134,7 +135,7 @@ class VideoAnalyzer(QThread):
             for (objectID, centroid) in objects.items():
                 
                 MIN_SPEED = int(self.vmax)
-                print(MIN_SPEED)
+                
                 to = trackableObjects.get(objectID, None)
                 if to is None:
                     to = TrackableObject(objectID, centroid)
@@ -144,7 +145,8 @@ class VideoAnalyzer(QThread):
                     direction = centroid[1] - np.mean(y)
                     to.centroids.append(centroid) 
                     if not to.counted:
-                        speed = np.linalg.norm(np.array(centroid) - np.array(to.centroids[-1]))
+                        dist = np.linalg.norm(np.array(to.centroids[-1]) - np.array(to.centroids[-2]))
+                        speed = (dist / SKIP_FPS)*100
                         if direction < 0 and speed < MIN_SPEED:
                             if objectID not in countedObjects:
                                 totalUP += 1
@@ -152,8 +154,8 @@ class VideoAnalyzer(QThread):
                             to.counted = True
                                                         
                 trackableObjects[objectID] = to
-                #text = "{}: {:.2f}%".format(category_index[idx]['name'], detection_scores[objectID]*100)
-                text = "{}: {:.1f}px/f, {:.2f}%".format(category_index[idx]['name'], np.linalg.norm(np.array([startX, startY]) - np.array([endX, endY])), detection_scores[objectID]*100)
+                #text = "{}: {:.2f}%".format(category_index[idx]['name'], detection_scores[objectID]*100
+                text = "{}: {:.1f}px/f, {:.2f}".format(category_index[idx]['name'], speed, detection_scores[objectID])
                 if objectID < len(rects):
                     (startX, startY, endX, endY) = rects[objectID]
                 cv2.putText(frame, text, (startX, startY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0 ,255, 0), 2)

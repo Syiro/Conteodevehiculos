@@ -66,9 +66,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_5.clicked.connect(self.genreport)
         #registrar info
         self.pushButton_7.clicked.connect(self.reguser)
+        #icons
+        iconoguardar = "/home/ruben-laptop/Tesis/code/icons/carpeta-de-archivos (1).png"
+        iconoconfdefecto = "/home/ruben-laptop/Tesis/code/icons/ajuste-de-documentos.png"
+        iconocargarconfig = "/home/ruben-laptop/Tesis/code/icons/configuraciones.png"
+        iconoseleccionarred ="/home/ruben-laptop/Tesis/code/icons/buscar.png"
+        iconocargar="/home/ruben-laptop/Tesis/code/icons/carga-de-archivos.png"
+        iconocancelar="/home/ruben-laptop/Tesis/code/icons/cancelar.png"
+        iconoaceptar="/home/ruben-laptop/Tesis/code/icons/cheque.png"
+        iconoplay="/home/ruben-laptop/Tesis/code/icons/play-button.png"
+        iconoestop="/home/ruben-laptop/Tesis/code/icons/stop-button.png"
+        iconoguardarusuario="/home/ruben-laptop/Tesis/code/icons/escritura.png"
+        iconogenerarreporte="/home/ruben-laptop/Tesis/code/icons/carga-de-archivos.png"
+        iconoarea="/home/ruben-laptop/Tesis/code/icons/area.png"
         self.label_35.setPixmap(QPixmap("/home/ruben-laptop/Tesis/code/icons/logounivalle.png"))
         self.label_22.setPixmap(QPixmap("/home/ruben-laptop/Tesis/code/icons/psi.png"))
-       
+        self.pushButton_3.setIcon(QIcon(iconoguardar))
+        self.pushButton_6.setIcon(QIcon(iconoconfdefecto))
+        self.pushButton_4.setIcon(QIcon(iconocargarconfig))
+        self.pushButton.setIcon(QIcon(iconoseleccionarred))
+        self.pushButton_2.setIcon(QIcon(iconocargar))
+        self.pushButton_9.setIcon(QIcon(iconoguardar))
+        self.pushButton_10.setIcon(QIcon(iconocancelar))
+        self.pushButton_8.setIcon(QIcon(iconoarea))
+        self.pushButton_12.setIcon(QIcon(iconoplay))
+        self.pushButton_13.setIcon(QIcon(iconoestop))
+        self.pushButton_7.setIcon(QIcon(iconoguardarusuario))
+        self.pushButton_5.setIcon(QIcon(iconogenerarreporte))
+        
+        icon = QIcon("/home/ruben-laptop/Tesis/code/icons/carros.png")
+        self.setWindowIcon(icon)
         progress_bar = QProgressBar()
         progress_bar.setValue(0)
         
@@ -339,7 +366,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.fotodetec = ImageAnalizer(photo_path="",treshold="")
                 red = pathname
                 self.thread.Cargaparametros(red=red)
-                self.fotodetec.Cargaparametros(red=red)
+                #self.fotodetec.Cargaparametros(red=red)
                 self.label_28.setText(pathname)
                 
             except Exception as e: 
@@ -430,6 +457,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.fileopen(type)          
             self.radioButton_3.setChecked(True)
             
+            
         if combobox.currentText() == "Imagenes":
             modo = "Imagenes"
             type = modo
@@ -441,6 +469,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             type = modo
             self.fileopen(type) 
             self.radioButton_2.setChecked(True)
+            
         return modo
      
     def showdialog(self):
