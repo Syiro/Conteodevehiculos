@@ -93,13 +93,89 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_13.setIcon(QIcon(iconoestop))
         self.pushButton_7.setIcon(QIcon(iconoguardarusuario))
         self.pushButton_5.setIcon(QIcon(iconogenerarreporte))
-        
         icon = QIcon("/home/ruben-laptop/Tesis/code/icons/carros.png")
         self.setWindowIcon(icon)
         progress_bar = QProgressBar()
         progress_bar.setValue(0)
         
-       
+        #ROI implement:
+        self.label_26.mousePressEvent = self.mousePressEvent
+        self.label_26.mouseReleaseEvent = self.mouseReleaseEvent
+        self.label_26.update()
+        #Definir area
+        self.pushButton_8.clicked.connect(self.DefinirRoi)
+        # #Cancelar area
+        self.pushButton_10.clicked.connect(self.CancelarRoi)
+        # #Guardar area
+        self.pushButton_9.clicked.connect(self.GuardarRoi)
+        global xmin, ymin, xmax, ymax
+        xmin=0
+        ymin=0
+        xmax=0
+        ymax=0
+        self.botonroi = False
+        
+        
+    def GuardarRoi(self):
+        text =  f'xmin: {xmin}\n' \
+                f'xmax: {xmax}\n' \
+                f'ymin: {ymin}\n' \
+                f'ymax: {ymax}'
+        self.textEdit_2.setText(text)
+        self.textEdit_2.show()
+    
+    
+    def DefinirRoi(self):
+        self.botonroi = True
+    
+
+    
+    def CancelarRoi(self):
+        xmin=0
+        ymin=0
+        xmax=0
+        ymax=0
+        image = QImage(self.label_26.size(), QImage.Format_ARGB32)
+        image.fill(Qt.transparent)
+        painter = QPainter(image)
+        painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+        painter.drawRect(QRect(xmin, ymin, xmax - xmin, ymax - ymin))
+        painter.end()
+        self.label_26.setPixmap(QPixmap.fromImage(image))
+        self.textEdit_2.setText("")
+        self.textEdit_2.show()
+        
+    def mousePressEvent(self, event):
+        global xmin, ymin, xmax, ymax
+        xmin = event.pos().x()
+        ymin = event.pos().y()
+
+    def mouseReleaseEvent(self, event):
+        global xmin, ymin, xmax, ymax
+        xmax = event.pos().x()
+        ymax = event.pos().y()
+
+        # Asegúrate de que xmax sea mayor que xmin y ymax sea mayor que ymin
+        if xmax < xmin:
+            xmin, xmax = xmax, xmin
+        if ymax < ymin:
+            ymin, ymax = ymax, ymin
+        if self.botonroi == True:
+            image = QImage(self.label_26.size(), QImage.Format_ARGB32)
+            image.fill(Qt.transparent)
+            painter = QPainter(image)
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawRect(QRect(xmin, ymin, xmax - xmin, ymax - ymin))
+            painter.end()
+            self.label_26.setPixmap(QPixmap.fromImage(image))
+        else: 
+            pass
+    # Establece la imagen temporal como la imagen del QLabel
+        
+
+    
+    
+    
     @pyqtSlot(np.ndarray)  
     def on_video_entered(self,frame):
         qt_img = self.convert_cv_qt(frame)
@@ -366,7 +442,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.fotodetec = ImageAnalizer(photo_path="",treshold="")
                 red = pathname
                 self.thread.Cargaparametros(red=red)
-                #self.fotodetec.Cargaparametros(red=red)
+                self.fotodetec.Cargaparametros(red=red)
                 self.label_28.setText(pathname)
                 
             except Exception as e: 
