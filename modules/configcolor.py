@@ -38,14 +38,3 @@ class ConfigColor:
         im_output.save(pathout)
         return pathout
     
-    # def converter_image(self,path,brillo,contraste,color):
-    #     contrast_converter = ImageEnhance.Contrast(path)
-    #     img_b = contrast_converter.enhance(contraste)
-    #     brightness_converter = ImageEnhance.Brightness(img_b)
-    #     img_c = brightness_converter.enhance(brillo)
-    #     color_converter = ImageEnhance.Color(img_c)
-    #     img_d = color_converter.enhance(color)
-    #     img_final=img_d
-    #     return img_final
-        
-

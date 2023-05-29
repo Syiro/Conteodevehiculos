@@ -100,8 +100,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
         #ROI implement:
         self.label_26.mousePressEvent = self.mousePressEvent
-        self.label_26.mouseReleaseEvent = self.mouseReleaseEvent
-        self.label_26.update()
+        #self.label_26.mouseReleaseEvent = self.mouseReleaseEvent
+        
         #Definir area
         self.pushButton_8.clicked.connect(self.DefinirRoi)
         # #Cancelar area
@@ -113,75 +113,62 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         ymin=0
         xmax=0
         ymax=0
+        self.points = []
         self.botonroi = False
+        self.original_pixmap =  QPixmap("/home/ruben-laptop/Tesis/code/firstframe.jpg")
         
         
     def GuardarRoi(self):
-        text =  f'xmin: {xmin}\n' \
-                f'xmax: {xmax}\n' \
-                f'ymin: {ymin}\n' \
-                f'ymax: {ymax}'
-        self.textEdit_2.setText(text)
-        self.textEdit_2.show()
-    
+        
+        if self.points == []:
+            p1=0
+            p2=0
+            p3=0
+            p4=0
+            self.textEdit_2.setText(f"p1: {p1}\np2: {p2}\np3: {p3}\np4: {p4}")
+            self.textEdit_2.show()
+        else:
+            p1 = (self.points[0].x(), self.points[0].y())
+            p2 = (self.points[1].x(), self.points[1].y())
+            p3 = (self.points[2].x(), self.points[2].y())
+            p4 = (self.points[3].x(), self.points[3].y())
+
+            self.textEdit_2.setText(f"p1: {p1}\np2: {p2}\np3: {p3}\np4: {p4}")
+            self.textEdit_2.show()
+        return p1, p2, p3, p4
     
     def DefinirRoi(self):
         self.botonroi = True
     
-
-    
     def CancelarRoi(self):
-        xmin=0
-        ymin=0
-        xmax=0
-        ymax=0
-        image = QImage(self.label_26.size(), QImage.Format_ARGB32)
-        image.fill(Qt.transparent)
-        painter = QPainter(image)
-        painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-        painter.drawRect(QRect(xmin, ymin, xmax - xmin, ymax - ymin))
-        painter.end()
-        self.label_26.setPixmap(QPixmap.fromImage(image))
+        self.label_26.setPixmap(self.original_pixmap)
+        self.points = []
         self.textEdit_2.setText("")
         self.textEdit_2.show()
         
     def mousePressEvent(self, event):
-        global xmin, ymin, xmax, ymax
-        xmin = event.pos().x()
-        ymin = event.pos().y()
-
-    def mouseReleaseEvent(self, event):
-        global xmin, ymin, xmax, ymax
-        xmax = event.pos().x()
-        ymax = event.pos().y()
-
-        # Asegúrate de que xmax sea mayor que xmin y ymax sea mayor que ymin
-        if xmax < xmin:
-            xmin, xmax = xmax, xmin
-        if ymax < ymin:
-            ymin, ymax = ymax, ymin
-        if self.botonroi == True:
-            image = QImage(self.label_26.size(), QImage.Format_ARGB32)
-            image.fill(Qt.transparent)
-            painter = QPainter(image)
-            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
-            painter.drawRect(QRect(xmin, ymin, xmax - xmin, ymax - ymin))
-            painter.end()
-            self.label_26.setPixmap(QPixmap.fromImage(image))
-        else: 
-            pass
-    # Establece la imagen temporal como la imagen del QLabel
+        if len(self.points) < 4:
+            self.points.append(event.pos())
         
+        if len(self.points) == 4:
+            self.drawPolygon()
+    
+    def drawPolygon(self):
+        if self.botonroi:
+            current_pixmap = self.label_26.pixmap()
+            new_pixmap = current_pixmap.copy()
+            painter = QPainter(new_pixmap)
+            painter.setPen(QPen(Qt.red, 2, Qt.SolidLine))
+            painter.drawPolygon(*self.points)
+            painter.end()
+            self.label_26.setPixmap(new_pixmap)
 
-    
-    
     
     @pyqtSlot(np.ndarray)  
     def on_video_entered(self,frame):
         qt_img = self.convert_cv_qt(frame)
         self.label_26.setPixmap(qt_img)
         self.progressBar.setValue(100)
-
         
     @pyqtSlot(int) 
     def on_count_entered(self,totalUp):
@@ -190,6 +177,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     @pyqtSlot(np.ndarray)
     def on_image_entered(self,img):
+        global pic
         pic = QPixmap.fromImage(QImage(img.data, img.shape[1], img.shape[0], QImage.Format_RGB888))
         self.label_26.setPixmap(pic) 
         self.progressBar.setValue(100)
@@ -226,12 +214,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 print("Vehículo detectado")
                 
     def auto(self):
-        global color, cont, brillo ,red ,skipfps , treshold
+        global color, cont, brillo ,red ,skipfps , treshold,vmax
         color=10
         cont=10
         brillo=10
         skipfps=30
         treshold=0.3
+        vmax=4
+        
         pathname = "fine_tuned_model.zip"
         red = pathname
         self.lineEdit.setText(str(skipfps))
@@ -239,7 +229,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.horizontalSlider_4.setValue(brillo)
         self.horizontalSlider_5.setValue(cont)
         self.horizontalSlider_6.setValue(color)
-        self.videodetec = VideoAnalyzer(video_path="",skipfps="",treshold="")
+        self.videodetec = VideoAnalyzer(video_path="",skipfps="",treshold="",vmax="",
+                                        fymax="",fxmin="",fymin="",fxmax="")
         self.fotodetec = ImageAnalizer(photo_path="",treshold="")
         self.fotodetec.Cargaparametros(red=pathname)
         self.videodetec.Cargaparametros(red=pathname)
@@ -254,12 +245,23 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         global b
         """Updates the image_label with a new opencv image"""
         qt_img = self.convert_cv_qt(cv_img)
+        qt_img2 = self.firstframe(cv_img)
         if b != 1: #condicion videos cargados para vizualizar en config
             self.label_18.setPixmap(qt_img)
+            self.label_26.setPixmap(qt_img2)
         else  : #condicion videos cargados para ejecucion
             self.label_26.setPixmap(qt_img) 
-            
-
+        #primer frame en label 26 implement:
+        
+    def firstframe(self,cv_img):
+        Image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
+        qt_img = QImage(Image.data, Image.shape[1], Image.shape[0], Image.shape[1] * 3, QtGui.QImage.Format_RGB888)
+        pic = qt_img.scaled(800, 600, Qt.KeepAspectRatio)
+        pixmap = QPixmap.fromImage(pic)
+        savepath = "firstframe.jpg"
+        pixmap.save(savepath)
+        return QPixmap.fromImage(pic)
+        
     def convert_cv_qt(self, cv_img):
         """Convert from an opencv image to QPixmap"""
         Image = cv2.cvtColor(cv_img, cv2.COLOR_BGR2RGB)
@@ -294,8 +296,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.progressBar.setValue(25)
         if modo == "Imagenes":
             skipfps , tresholdp, vmax = self.guardar()
+            fxmin , fxmax, fymin, fymax = self.GuardarRoi()
             #self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
-            self.fotodetec = ImageAnalizer(photo_path="original-image.png",treshold=tresholdp)
+            self.fotodetec = ImageAnalizer(photo_path="original-image.png",treshold=tresholdp,
+                                           fxmin=fxmin,fxmax=fxmax, fymin=fymin, fymax=fymax)
             self.fotodetec.start()
             self.fotodetec.ImgEntered.connect(self.on_image_entered)
             self.fotodetec.CountImgEntered.connect(self.on_count_imgentered)
@@ -305,7 +309,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
         elif modo == "Video":
             skipfps , treshold, vmax = self.guardar()
-            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,vmax=vmax)
+            fxmin , fxmax, fymin, fymax = self.GuardarRoi()
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,
+                                            vmax=vmax,fxmin=fxmin, fxmax=fxmax, fymin=fymin, fymax=fymax)
+            
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
@@ -314,7 +321,9 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
              
         elif modo == "Video en Tiempo real":
             skipfps , treshold, vmax = self.guardar()
-            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,vmax=vmax)
+            fxmin , fxmax, fymin, fymax = self.GuardarRoi()
+            self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,
+                                            vmax=vmax,fxmin=fxmin, fxmax=fxmax, fymin=fymin, fymax=fymax)
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
@@ -369,27 +378,39 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             print(response.content)
     
     def enviarimport(self,data):
-        global brillo,cont,color,modo,red
+        global brillo,cont,color,modo,red,skipfps,treshold,vmax
         brillo = data["brillo"]
         cont = data["contraste"]
         color = data["color"]
         modo = data["modo"]
         red = data["redneuronal"]
-        self.horizontalSlider_4.setValue(brillo)
-        self.horizontalSlider_5.setValue(cont)
-        self.horizontalSlider_6.setValue(color)
-       
-        index=self.comboBox.findText(modo)
-        index2=self.comboBox_4.findText(red)
-        self.comboBox.setCurrentIndex(index)
-        self.comboBox_4.setCurrentIndex(index2)
-        
-        if fname!="" and brillo!=10 and cont !=10:
-            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,color)))
-        elif fname!="" and brillo!=10 and color !=10:
-            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,cont)))
-        elif fname!="" and cont!=10 and color !=10:
-            self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
+        skipfps = data["skipfps"]
+        treshold =data["treshold"]
+        vmax = data["vmax"]
+        if modo != "Imagenes":
+            self.frame_3.setDisabled(True)
+            fxmin , fxmax, fymin, fymax = self.GuardarRoi()
+            self.thread = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,vmax=vmax,fxmin=fxmin,fymin=fymin,
+                    fxmax=fxmax,fymax=fymax)
+            self.thread.Cargaparametros(red=red)   
+        else: 
+            self.fotodetec = ImageAnalizer(photo_path="",treshold="")
+            self.fotodetec.Cargaparametros(red=red)
+            self.label.setDisabled(True)
+            self.horizontalSlider_4.setValue(brillo)
+            self.horizontalSlider_5.setValue(cont)
+            self.horizontalSlider_6.setValue(color)
+            index=self.comboBox.findText(modo)
+            index2=self.comboBox_4.findText(red)
+            self.comboBox.setCurrentIndex(index)
+            self.comboBox_4.setCurrentIndex(index2)
+            
+            if fname!="" and brillo!=10 and cont !=10:
+                self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,color)))
+            elif fname!="" and brillo!=10 and color !=10:
+                self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,cont)))
+            elif fname!="" and cont!=10 and color !=10:
+                self.label_18.setPixmap(QPixmap(self.configuracionbrillo(fname,brillo)))
     
     def configuracionbrillo(self,path,brillo):
         pathout = ConfigColor.configbrillo(self, path=path,brillo=brillo)
@@ -438,11 +459,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             
             try: 
                 pathname,bo = QFileDialog.getOpenFileName(self,'Open File',''," Archivo comprimido (*.zip *.rar)") 
-                self.thread = VideoAnalyzer(video_path="",skipfps="",treshold="",vmax="")
+                self.thread = VideoAnalyzer(video_path="",skipfps="",treshold="",vmax="",fxmin=0,fymin=0,
+                                            fxmax=0,fymax=0)
                 self.fotodetec = ImageAnalizer(photo_path="",treshold="")
                 red = pathname
                 self.thread.Cargaparametros(red=red)
-                self.fotodetec.Cargaparametros(red=red)
+                if modo == "Imagenes":
+                    self.fotodetec.Cargaparametros(red=red)
+                
                 self.label_28.setText(pathname)
                 
             except Exception as e: 
@@ -485,6 +509,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     
     def configactual(self,data):
         self.textEdit.setPlainText(data)
+        
         
         
     def brillo(self):
@@ -558,13 +583,11 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         fname = url 
      
     def genreport(self):
-
         self.horainicial = self.timeEdit.time()
         self.horafinal = self.timeEdit_2.time()
         Reporte.hora(self=self,horainit=self.horainicial.toString("hh:mm AP"),horafin=self.horafinal.toString("hh:mm AP"))
         Reporte.reporte(self=self)
  
-    
     def reguser(self):
         nombre = self.lineEdit_3.text()
         email = self.lineEdit_4.text()
@@ -578,7 +601,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def fechaini(self):
         fechainit = self.calendarWidget.selectedDate()
         # establecer fecha mínima en el segundo calendario
-        
         self.calendarWidget_2.setMinimumDate(fechainit)
         self.calendarWidget_2.setSelectedDate(fechainit)
         # guardar fecha seleccionada en la variable de fecha inicial
@@ -591,7 +613,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.fecha_final = fechafin.toString("yyyy-MM-dd")
         Reporte.fecha(self=self,fechainit=self.fecha_inicial,fechafin=self.fecha_final)
         
-
 if __name__ == "__main__":
     gui = QtWidgets.QApplication([])
     window = MainWindow()

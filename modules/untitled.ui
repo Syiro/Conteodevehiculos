@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>../../../../../../../.designer/backup/icons/icon.png</normaloff>../../../../../../../.designer/backup/icons/icon.png</iconset>
+    <normaloff>../../../../../../../../.designer/backup/icons/icon.png</normaloff>../../../../../../../../.designer/backup/icons/icon.png</iconset>
   </property>
   <property name="layoutDirection">
    <enum>Qt::LeftToRight</enum>
@@ -110,7 +110,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>../../../../../.designer/icons/logounivalle.png</pixmap>
+          <pixmap>../../../../../../.designer/icons/logounivalle.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -138,7 +138,7 @@
           <string/>
          </property>
          <property name="pixmap">
-          <pixmap>../../../../../.designer/icons/psi.png</pixmap>
+          <pixmap>../../../../../../.designer/icons/psi.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -365,7 +365,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>../../../.designer/icons/carpeta-de-archivos.png</normaloff>../../../.designer/icons/carpeta-de-archivos.png</iconset>
+                 <normaloff>../../../../.designer/icons/carpeta-de-archivos.png</normaloff>../../../../.designer/icons/carpeta-de-archivos.png</iconset>
                </property>
               </widget>
              </item>
@@ -379,7 +379,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>../../../.designer/icons/ajuste-de-documentos.png</normaloff>../../../.designer/icons/ajuste-de-documentos.png</iconset>
+                 <normaloff>../../../../.designer/icons/ajuste-de-documentos.png</normaloff>../../../../.designer/icons/ajuste-de-documentos.png</iconset>
                </property>
               </widget>
              </item>
@@ -393,7 +393,7 @@ p, li { white-space: pre-wrap; }
                </property>
                <property name="icon">
                 <iconset>
-                 <normaloff>../../../.designer/icons/configuraciones.png</normaloff>../../../.designer/icons/configuraciones.png</iconset>
+                 <normaloff>../../../../.designer/icons/configuraciones.png</normaloff>../../../../.designer/icons/configuraciones.png</iconset>
                </property>
               </widget>
              </item>
@@ -804,15 +804,15 @@ p, li { white-space: pre-wrap; }
          <item>
           <widget class="QLabel" name="label_26">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+            <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="maximumSize">
             <size>
-             <width>1000</width>
-             <height>1000</height>
+             <width>800</width>
+             <height>450</height>
             </size>
            </property>
            <property name="mouseTracking">

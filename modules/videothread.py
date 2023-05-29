@@ -29,13 +29,17 @@ class VideoAnalyzer(QThread):
     videoEntered = pyqtSignal(np.ndarray)
     coutEntered = pyqtSignal(int)
     
-    def __init__(self, video_path,skipfps,treshold,vmax):
+    def __init__(self, video_path,skipfps,treshold,vmax,fxmin,fxmax,fymin,fymax):
         super(VideoAnalyzer, self).__init__()
         self.video_path = video_path
         self.skipfps = skipfps
         self.treshold = treshold
         self.vmax = vmax
-    
+        self.p1 = fxmin
+        self.p2 = fxmax
+        self.p3 = fymin
+        self.p4 = fymax
+        
     def Cargaparametros(self,red):
         local_zip = red # sacar a la interfaz
         zip_ref = zipfile.ZipFile(local_zip, "r")
@@ -45,21 +49,17 @@ class VideoAnalyzer(QThread):
         PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
         
-    
-    
     def run(self):
         fps = FPS().start()
         fps2 = FPS().start()
         PATH_VIDEO = self.video_path
         parsed = urlparse(PATH_VIDEO)
-
         if parsed.scheme == "http" or parsed.scheme == "https":
              video = pafy.new(PATH_VIDEO)
              best = video.getbest(preftype='mp4')
              vs = cv2.VideoCapture(best.url)
         else:
-             vs = cv2.VideoCapture(PATH_VIDEO)
-             
+             vs = cv2.VideoCapture(PATH_VIDEO)   
         category_index = label_map_util.create_category_index_from_labelmap("label_map.pbtxt", use_display_name=True)
         TRESHOLD = float(self.treshold) # sacar a la interfa
         W = int(vs.get(cv2.CAP_PROP_FRAME_WIDTH))
@@ -69,77 +69,67 @@ class VideoAnalyzer(QThread):
         trackers = []
         trackableObjects = {}
         rects = []
-        totalFrame = 0
         totaldeteccions = 0
         totalUP = 0
         detect_fn = tf.saved_model.load(PATH_TO_SAVE_MODEL)
         countedObjects = {}
         speed=0
-        while True:
-            
+        frame_processed = 0
+        
+        while True:  
             ret, frame = vs.read()
-                        
-            if frame is None:
-                
-
-                break
-
             status = "Waiting"
-            rects = []
-
-            if totalFrame % SKIP_FPS == 0:
+            rects = []  
+            if frame is None:
+                break
+            
+            if self.p1 != 0 and self.p2 != 0 and self.p3 != 0 and self.p4 != 0:
+                frame = cv2.resize(frame, (800, 450))
+                background = np.zeros_like(frame)
+                pts = np.array([self.p1, self.p2, self.p3, self.p4], np.int32)
+                cv2.fillPoly(background, [pts], (255, 255, 255))
+                frame = cv2.bitwise_and(frame, background)
+                H, W, _ = frame.shape  
+                
+            
+            if frame_processed % SKIP_FPS==0:
                 status = "Detecting"
                 totaldeteccions += 1
                 trackers = []
-
-                image_np = np.array(frame)
+                image_np = Image.fromarray(frame)
                 input_tensor = tf.convert_to_tensor(image_np)
                 input_tensor = input_tensor[tf.newaxis, ...]
                 detections = detect_fn(input_tensor)
                 detection_scores = np.array(detections["detection_scores"][0])
-                detection_clean = [
-                    x for x in detection_scores if x >= TRESHOLD]
-
+                detection_clean = [x for x in detection_scores if x >= TRESHOLD]
                 for x in range(len(detection_clean)):
                     idx = int(detections['detection_classes'][0][x])
-
-                    ymin, xmin, ymax, xmax = np.array(
-                        detections['detection_boxes'][0][x])
+                    ymin, xmin, ymax, xmax = np.array(detections['detection_boxes'][0][x])
                     box = [xmin, ymin, xmax, ymax] * np.array([W, H, W, H])
-
                     (startX, startY, endX, endY) = box.astype("int")
-
                     tracker = dlib.correlation_tracker()
                     rect = dlib.rectangle(startX, startY, endX, endY)
                     tracker.start_track(frame, rect)
-                    
                     trackers.append(tracker)
-                    
             else:
                 for tracker in trackers:
                     status = "Tracking"
-
                     tracker.update(frame)
                     pos = tracker.get_position()
-
                     startX = int(pos.left())
                     startY = int(pos.top())
                     endX = int(pos.right())
                     endY = int(pos.bottom())
-
-                    rects.append((startX, startY, endX, endY))
-                    
-
-            objects = ct.update(rects)
+                    rects.append((startX, startY, endX, endY))      
+            frame_processed += 1
             
+            #ret, frame = vs.read()
+            objects = ct.update(rects)
             for (objectID, centroid) in objects.items():
-                
                 MIN_SPEED = int(self.vmax)
-                
                 to = trackableObjects.get(objectID, None)
                 if to is None:
                     to = TrackableObject(objectID, centroid)
-
                 else:
                     y = [c[1] for c in to.centroids]
                     direction = centroid[1] - np.mean(y)
@@ -166,40 +156,23 @@ class VideoAnalyzer(QThread):
                 cv2.rectangle(frame, (startX, startY), (endX, endY), color, 2)
 
             info = [
-                ("Carros detectados", totalUP),
-                ("Estado", status),
-            ]
+                ("Carros detectados", totalUP),("Estado", status),]
 
             for (i, (k, v)) in enumerate(info):
                 text = "{}: {}".format(k, v)
-                cv2.putText(frame, text, (10, H - ((i*20) + 20)),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
-
-
-            #writer.write(frame)
-
-            
-            totalFrame += 1
+                cv2.putText(frame, text, (10, H - ((i*20) + 20)),cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 0, 255), 2)
             fps2.update()
-            if totalFrame == 1 :
-                
+            if frame_processed == 1 :
                 fps.stop()
-            
             #print(totaldeteccions)
             self.videoEntered.emit(frame)
             self.coutEntered.emit(totalUP)
-            
-            #print(totalFrame)
-
+        
         vs.release()
         fps2.stop()
-                
-
-            
         print("Tiempo en empezar a procesar es : {}".format(fps.elapsed()))
         print("Frames por segundo {}".format(fps2.fps()))
         print("Tiempo total de procesado es:{}".format(fps2.elapsed()))
-        
         
         ultimousuario = self.ultimousuario()
         ultimousuario=int(ultimousuario)
@@ -208,29 +181,20 @@ class VideoAnalyzer(QThread):
         pyload = {'idcarros':ultimousuario,'fecha':str(datetime.now()),'carrosdetectados':count}
         data=json.dumps(pyload) 
         response = requests.post(url, data)   
-        
         if response.status_code == 200:
             print(response.content) 
+    
             
     def ultimousuario(self):
-            # Conexión a la base de datos
         mydb = mysql.connector.connect(
         host="127.0.0.1",
         user="root",
         password="Syiro2101.",
-        database="mydb"
-        )
-
-    # Crear cursor
+        database="mydb")
+        
         cursor = mydb.cursor()
-
-        # Ejecutar la consulta
         cursor.execute("SELECT idusuarios FROM usuarios ORDER BY idusuarios DESC LIMIT 1;")
         result = cursor.fetchone()
         return result[0]
-        
-    
-
-    #writer.release()
 
     

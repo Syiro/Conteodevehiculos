@@ -1,1 +1,1 @@
-{"idconfiguracion": 4, "brillo": 1, "contraste": 1, "color": 1, "modo": "Video", "redneuronal": "/home/ruben-laptop/Tesis/code/videodetect/fine_tuned_model.zip", "skipfps": "30", "treshold": "0.3", "vmax": "4"}
+{"idconfiguracion": 4, "brillo": 1, "contraste": 1, "color": 1, "modo": "Video", "redneuronal": "fine_tuned_model.zip", "skipfps": 30, "treshold": 0.3, "vmax": 4}
