@@ -120,13 +120,14 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         
     def GuardarRoi(self):
         
-        if self.points == []:
+        if len(self.points) == 0:
             p1=0
             p2=0
             p3=0
             p4=0
             self.textEdit_2.setText(f"p1: {p1}\np2: {p2}\np3: {p3}\np4: {p4}")
             self.textEdit_2.show()
+            print("ejeucion sin area definida")
         else:
             p1 = (self.points[0].x(), self.points[0].y())
             p2 = (self.points[1].x(), self.points[1].y())
@@ -269,10 +270,13 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         pic = convertir_QT.scaled(800, 600, Qt.KeepAspectRatio)
         return QPixmap.fromImage(pic)
 
-    def closeEvent(self, event):
-        self.thread.stop()
+    def closeEvent(self):
+        self.videodetec.stop()
         self.label_26.clear()
-        event.accept()
+        self.progressBar.setValue(0)
+        self.textEdit_2.setText("Ejecución cancelada por el usuario")
+        self.textEdit_2.show()
+        self.points.clear()
 
     def guardar(self):
         global skipfps, treshold, vmax
@@ -297,28 +301,19 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if modo == "Imagenes":
             skipfps , tresholdp, vmax = self.guardar()
             fxmin , fxmax, fymin, fymax = self.GuardarRoi()
-            #self.Mostrar_img(fname=fname,brillo=brillo,color=color,cont=cont)
             self.fotodetec = ImageAnalizer(photo_path="original-image.png",treshold=tresholdp,
                                            fxmin=fxmin,fxmax=fxmax, fymin=fymin, fymax=fymax)
             self.fotodetec.start()
             self.fotodetec.ImgEntered.connect(self.on_image_entered)
             self.fotodetec.CountImgEntered.connect(self.on_count_imgentered)
-            
-            
-            
-            
         elif modo == "Video":
             skipfps , treshold, vmax = self.guardar()
             fxmin , fxmax, fymin, fymax = self.GuardarRoi()
             self.videodetec = VideoAnalyzer(video_path=fname,skipfps=skipfps,treshold=treshold,
                                             vmax=vmax,fxmin=fxmin, fxmax=fxmax, fymin=fymin, fymax=fymax)
-            
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
-            self.videodetec.coutEntered.connect(self.on_count_entered)
-            
-            
-             
+            self.videodetec.coutEntered.connect(self.on_count_entered)  
         elif modo == "Video en Tiempo real":
             skipfps , treshold, vmax = self.guardar()
             fxmin , fxmax, fymin, fymax = self.GuardarRoi()
@@ -327,10 +322,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.videodetec.start()
             self.videodetec.videoEntered.connect(self.on_video_entered)
             self.videodetec.coutEntered.connect(self.on_count_entered)
-            
-            
-
-        
         self.Ejecucion_mode(modo=modo,red=red) 
          
     def start_video(self,a,videofile):
@@ -594,7 +585,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         telefono = self.lineEdit_5.text()
         departamento  = self.lineEdit_7.text()
         municipio = self.lineEdit_8.text()
-        Reporte.insertuser(self=self,nombre=nombre,email=email,telefono=telefono)
+        granularidad = self.lineEdit_9.text()
+        Reporte.insertuser(self=self,nombre=nombre,email=email,telefono=telefono,granularidad=granularidad)
         Reporte.insertdepa(self=self,departamentos=departamento)
         Reporte.insertcity(self=self,municipio=municipio)
     

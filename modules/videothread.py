@@ -39,6 +39,7 @@ class VideoAnalyzer(QThread):
         self.p2 = fxmax
         self.p3 = fymin
         self.p4 = fymax
+        self.stopped = False
         
     def Cargaparametros(self,red):
         local_zip = red # sacar a la interfaz
@@ -48,6 +49,10 @@ class VideoAnalyzer(QThread):
         global PATH_TO_SAVE_MODEL
         PATH_TO_MODEL_DIR = 'fine_tuned_model/content/fine_tuned_model'
         PATH_TO_SAVE_MODEL = PATH_TO_MODEL_DIR + '/saved_model'
+    
+    def stop(self):
+        self.stopped = True
+        self.wait()
         
     def run(self):
         fps = FPS().start()
@@ -79,7 +84,10 @@ class VideoAnalyzer(QThread):
         while True:  
             ret, frame = vs.read()
             status = "Waiting"
-            rects = []  
+            rects = [] 
+            if self.stopped:
+                break
+            
             if frame is None:
                 break
             
